@@ -71,7 +71,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
                         onChanged: (String value) => print(value),
                         style: Theme.of(context).textTheme.bodyText1,
                         decoration: InputDecoration(
-
+                          hintText: 'Enter Your Query Here',
+                          border: OutlineInputBorder(borderSide: BorderSide(width: 1.0, color: Colors.red, style: BorderStyle.solid ), borderRadius: BorderRadius.all(Radius.circular(20.0)))
                         ),
                         controller: queryTextFormFieldController,
                       ),
