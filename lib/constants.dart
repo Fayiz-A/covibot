@@ -1,0 +1,1 @@
+const String emptyStringQuery = 'nothing in query with passcode abc@77';
