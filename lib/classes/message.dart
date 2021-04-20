@@ -8,11 +8,19 @@ enum Sender {
 class Message {
   final String message;
   final Sender sender;
-  // final List<String> options;
+  final Option option;//it is dynamic as the json was parsed that way
 
   Message({
       @required this.message,
-      @required this.sender
+      @required this.sender,
+      this.option
   });
 
+}
+
+class Option {
+  final String message;
+  final String queryForChatbot;
+
+  Option({@required this.message, @required this.queryForChatbot});
 }
