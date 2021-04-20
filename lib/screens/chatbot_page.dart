@@ -9,11 +9,11 @@ class ChatbotPage extends StatefulWidget {
 }
 
 class _ChatbotPageState extends State<ChatbotPage> {
-  
+
   TextEditingController queryTextFormFieldController = TextEditingController();
 
   ChatbotBloc chatBloc;
-  
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -28,7 +28,9 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
   @override
   Widget build(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
+    Size screenSize = MediaQuery
+        .of(context)
+        .size;
 
     return Scaffold(
       appBar: AppBar(
@@ -38,77 +40,97 @@ class _ChatbotPageState extends State<ChatbotPage> {
         children: [
           Flexible(
             child: BlocBuilder<ChatbotBloc, ChatbotState>(
-              builder: (BuildContext context, ChatbotState state) {
-                if(state is MessageAddedState) {
+                builder: (BuildContext context, ChatbotState state) {
+                  if (state is MessageAddedState) {
+                    List<Message> chatList = state.chatList;
 
-                  List<Message> chatList = state.chatList;
+                    return ListView.builder(
+                        reverse: true,
+                        itemCount: chatList.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          Message message = chatList[index];
 
-                  return ListView.builder(
-                      reverse: true,
-                      itemCount: chatList.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        Message message = chatList[index];
+                          bool chatbotSender = message.sender == Sender.chatbot;
 
-                        bool chatbotSender = message.sender == Sender.chatbot;
+                          bool optionPresent = message.option != null;
 
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: chatbotSender ? MainAxisAlignment.start:MainAxisAlignment.end,
-                            children: [
-                              CircleAvatar(
-                                child: chatbotSender ? Icon(Icons.computer):Icon(Icons.person),
-                                backgroundColor: Colors.black,
-                              ),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                                  child: Container(
-                                    width: screenSize.width * 0.7,
-                                    color: chatbotSender ? Colors.orangeAccent:Colors.greenAccent,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: SelectableText(
-                                        chatList[index].message,
-                                        style: Theme.of(context).textTheme.bodyText1,
-                                      ),
-                                    ),
-                                  ),
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: chatbotSender
+                                  ? MainAxisAlignment.start
+                                  : MainAxisAlignment.end,
+                              children: [
+                                CircleAvatar(
+                                  child: chatbotSender
+                                      ? Icon(Icons.computer)
+                                      : Icon(Icons.person),
+                                  backgroundColor: Colors.black,
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      });
-
-                } else {
-                  return CircularProgressIndicator();
+                                Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 8.0),
+                                    child: GestureDetector(
+                                      onTap: () =>
+                                      optionPresent
+                                          ? clearTextBoxAndSendQuery(query: message.option.queryForChatbot)
+                                          : null,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(20.0)),
+                                        child: Container(
+                                          width: screenSize.width * 0.7,
+                                          color: chatbotSender ? Colors
+                                              .orangeAccent : Colors
+                                              .greenAccent,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: SelectableText(
+                                              optionPresent
+                                                  ? chatList[index]
+                                                  .option.queryForChatbot
+                                                  : chatList[index].message,
+                                              style: Theme
+                                                  .of(context)
+                                                  .textTheme
+                                                  .bodyText1,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                ),
+                              ],
+                            ),
+                          );
+                        });
+                  } else {
+                    return CircularProgressIndicator();
+                  }
+                  // return ListView.builder(
+                  //     reverse: true,
+                  //     itemCount: 2,
+                  //     itemBuilder: (BuildContext context, int index) {
+                  //       return Padding(
+                  //         padding: const EdgeInsets.all(8.0),
+                  //         child: ClipRRect(
+                  //           borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                  //           child: Container(
+                  //             width: screenSize.width * 0.8,
+                  //             height: screenSize.height * 0.05,
+                  //             color: Colors.lightBlueAccent,
+                  //             child: Padding(
+                  //               padding: const EdgeInsets.all(8.0),
+                  //               child: SelectableText(
+                  //                 'Text',
+                  //                 style: Theme.of(context).textTheme.bodyText1,
+                  //               ),
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       );
+                  //     });
                 }
-                // return ListView.builder(
-                //     reverse: true,
-                //     itemCount: 2,
-                //     itemBuilder: (BuildContext context, int index) {
-                //       return Padding(
-                //         padding: const EdgeInsets.all(8.0),
-                //         child: ClipRRect(
-                //           borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                //           child: Container(
-                //             width: screenSize.width * 0.8,
-                //             height: screenSize.height * 0.05,
-                //             color: Colors.lightBlueAccent,
-                //             child: Padding(
-                //               padding: const EdgeInsets.all(8.0),
-                //               child: SelectableText(
-                //                 'Text',
-                //                 style: Theme.of(context).textTheme.bodyText1,
-                //               ),
-                //             ),
-                //           ),
-                //         ),
-                //       );
-                //     });
-              }
             ),
           ),
           Divider(
@@ -117,32 +139,42 @@ class _ChatbotPageState extends State<ChatbotPage> {
           Padding(
             padding: const EdgeInsets.only(bottom: 4.0),
             child: ListTile(
-              title: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Container(
-                  child: TextFormField(
-                    onFieldSubmitted: (String query) => clearTextBoxAndSendQuery(query: query,),//query from text controller will also work fine
-                    style: Theme.of(context).textTheme.bodyText1,
-                    decoration: InputDecoration(
-                      hintText: 'Enter Your Query Here',
-                      border: OutlineInputBorder(borderSide: BorderSide(width: 1.0, color: Colors.red, style: BorderStyle.solid ), borderRadius: BorderRadius.all(Radius.circular(20.0)))
+                title: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Container(
+                    child: TextFormField(
+                      onFieldSubmitted: (String query) =>
+                          clearTextBoxAndSendQuery(query: query,),
+                      //query from text controller will also work fine
+                      style: Theme
+                          .of(context)
+                          .textTheme
+                          .bodyText1,
+                      decoration: InputDecoration(
+                          hintText: 'Enter Your Query Here',
+                          border: OutlineInputBorder(
+                              borderSide: BorderSide(width: 1.0, color: Colors
+                                  .red, style: BorderStyle.solid),
+                              borderRadius: BorderRadius.all(Radius.circular(
+                                  20.0)))
+                      ),
+                      controller: queryTextFormFieldController,
                     ),
-                    controller: queryTextFormFieldController,
                   ),
                 ),
-              ),
                 trailing: Padding(
                   padding: EdgeInsets.all(4.0),
                   child: ClipOval(
-                    child: Tooltip(
-                      message: 'Send',
-                      preferBelow: false,
-                      child: IconButton(
-                        icon: Icon(Icons.send),
-                        iconSize: 30.0,
-                        onPressed: () => clearTextBoxAndSendQuery(query: queryTextFormFieldController.text,),
-                      ),
-                    )
+                      child: Tooltip(
+                        message: 'Send',
+                        preferBelow: false,
+                        child: IconButton(
+                          icon: Icon(Icons.send),
+                          iconSize: 30.0,
+                          onPressed: () => clearTextBoxAndSendQuery(
+                            query: queryTextFormFieldController.text,),
+                        ),
+                      )
                   ),
                 )
             ),
