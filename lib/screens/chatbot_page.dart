@@ -15,8 +15,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
   ChatbotBloc chatBloc;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void initState() {
+    super.initState();
     chatBloc = BlocProvider.of<ChatbotBloc>(context);
   }
 
@@ -80,7 +80,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                             Radius.circular(20.0)),
                                         child: Container(
                                           width: screenSize.width * 0.7,
-                                          color: chatbotSender ? Colors
+                                          color: chatbotSender ? optionPresent ? Colors.red : Colors
                                               .orangeAccent : Colors
                                               .greenAccent,
                                           child: Padding(

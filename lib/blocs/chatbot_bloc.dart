@@ -1,9 +1,8 @@
 import 'package:covibot/classes/message.dart';
+import 'package:covibot/constants.dart' as constants;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dialogflow/dialogflow_v2.dart';
-
-import 'package:covibot/constants.dart' as constants;
 
 abstract class ChatbotEvent {}
 
@@ -13,12 +12,17 @@ class SendQueryEvent extends ChatbotEvent {
   SendQueryEvent({@required this.query});
 }
 
+class SendMessageFromChatbotEvent extends ChatbotEvent {
+  final String message;
+  final Option option;
+
+  SendMessageFromChatbotEvent({@required this.message, this.option});
+}
+
 class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
   Dialogflow dialogflow;
 
-  ChatbotBloc() : super(InitialState()) {
-    _initializeDialogflow();
-  }
+  ChatbotBloc() : super(InitialState());
 
   List<Message> chatList = [];
 
@@ -27,9 +31,8 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
     if (event is SendQueryEvent) {
       String query = event.query;
 
-      if (query == null || query
-          .trim()
-          .length == 0) query = constants.emptyStringQuery;
+      if (query == null || query.trim().length == 0)
+        query = constants.emptyStringQuery;
 
       Message userMessage = Message(sender: Sender.user, message: event.query);
       chatList.insert(0, userMessage);
@@ -41,10 +44,11 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
 
       List responseListMessages = aiResponse.getListMessage();
 
-      String responseFromChatbot = responseListMessages[0]["text"]["text"][0]
-          .toString();
+      String responseFromChatbot =
+      responseListMessages[0]["text"]["text"][0].toString();
 
-      Message chatbotMessage = Message(sender: Sender.chatbot, message: responseFromChatbot);
+      Message chatbotMessage =
+      Message(sender: Sender.chatbot, message: responseFromChatbot);
 
       chatList.insert(0, chatbotMessage);
 
@@ -52,24 +56,32 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
           responseListMessages[1]["payload"] != null) {
         List options = responseListMessages[1]["payload"]["options"];
 
-        for(int index = 0; index < options.length; index++) {
-          var option = options[index];
+        for (int index = 0; index < options.length; index++) {
+          _addAnswerFromChatbot(
+              message: responseFromChatbot,
+              option: Option(
+                  queryForChatbot: options[index]["query"],
+                  message: options[index]["text"]));
 
-          chatList.insert(0,
-            Message(
-                sender: Sender.chatbot,
-                message: responseFromChatbot,
-                option: Option(
-                    queryForChatbot: options[index]["query"],
-                    message: options[index]["text"])
-            ),
-          );
+          // chatList.insert(0,
+          //   Message(
+          //       sender: Sender.chatbot,
+          //       message: responseFromChatbot,
+          //       option: Option(
+          //           queryForChatbot: options[index]["query"],
+          //           message: options[index]["text"])
+          //   ),
+          // );
         }
       }
 
       print('response: $responseFromChatbot');
 
       yield MessageAddedState(chatList: chatList);
+    } else if(event is SendMessageFromChatbotEvent) {
+      _addAnswerFromChatbot(message: event.message, option: event.option);
+      yield MessageAddedState(chatList: chatList);
+
     } else {
       yield InitialState();
     }
@@ -79,6 +91,11 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
     AuthGoogle authGoogle =
     await AuthGoogle(fileJson: "assets/services.json").build();
     dialogflow = Dialogflow(authGoogle: authGoogle, language: Language.english);
+  }
+
+  void _addAnswerFromChatbot({Option option, @required String message}) {
+    chatList.insert(
+        0, Message(sender: Sender.chatbot, message: message, option: option));
   }
 }
 
