@@ -115,13 +115,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
         //wait for some time to remove abruptness
 
         await Future.delayed(constants.durationBeforeRenderingProgressIndicator);
-        // chatList.insert(
-        //     0,
-        //     Message(
-        //         sender: Sender.chatbot,
-        //         message: message,
-        //         option: option,
-        //         loading: loading));
+
       }
         chatList.insert(
             0,

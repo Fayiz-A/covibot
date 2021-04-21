@@ -1,7 +1,9 @@
 import 'package:covibot/blocs/chatbot_bloc.dart';
 import 'package:covibot/classes/message.dart';
+import 'package:covibot/constants.dart' as constants;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ChatbotPage extends StatefulWidget {
   @override
@@ -38,83 +40,99 @@ class _ChatbotPageState extends State<ChatbotPage> {
           Flexible(
             child: BlocBuilder<ChatbotBloc, ChatbotState>(
                 builder: (BuildContext context, ChatbotState state) {
-              if (state is MessageAddedState) {
-                List<Message> chatList = state.chatList;
+                  if (state is MessageAddedState) {
+                    List<Message> chatList = state.chatList;
 
-                return ListView.builder(
-                    reverse: true,
-                    itemCount: chatList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      Message message = chatList[index];
+                    return ListView.builder(
+                        reverse: true,
+                        itemCount: chatList.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          Message message = chatList[index];
 
-                      bool chatbotSender = message.sender == Sender.chatbot;
+                          bool chatbotSender = message.sender == Sender.chatbot;
 
-                      bool optionPresent = message.option != null;
+                          bool optionPresent = message.option != null;
 
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: chatbotSender
-                              ? MainAxisAlignment.start
-                              : MainAxisAlignment.end,
-                          children: [
-                            CircleAvatar(
-                              child: chatbotSender
-                                  ? Icon(Icons.computer)
-                                  : Icon(Icons.person),
-                              backgroundColor: Colors.black,
-                            ),
-                            Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                child: ClipRRect(
-                                  borderRadius:
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: chatbotSender
+                                  ? MainAxisAlignment.start
+                                  : MainAxisAlignment.end,
+                              children: [
+                                CircleAvatar(
+                                  child: chatbotSender
+                                      ? Icon(Icons.computer)
+                                      : Icon(Icons.person),
+                                  backgroundColor: Colors.black,
+                                ),
+                                Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                    child: ClipRRect(
+                                      borderRadius:
                                       BorderRadius.all(Radius.circular(20.0)),
-                                  child: GestureDetector(
-                                    onTap: () => optionPresent
-                                        ? clearTextBoxAndSendQuery(
-                                            query: message
-                                                .option.queryForChatbot)
-                                        : null,
-                                    child: Container(
-                                      width: screenSize.width * 0.7,
-                                      color: chatbotSender
-                                          ? optionPresent
+                                      child: GestureDetector(
+                                        onTap: () => optionPresent
+                                            ? clearTextBoxAndSendQuery(
+                                            query:
+                                            message.option.queryForChatbot)
+                                            : null,
+                                        child: Container(
+                                          width: screenSize.width * 0.7,
+                                          color: chatbotSender
+                                              ? optionPresent
                                               ? Colors.red
                                               : Colors.orangeAccent
-                                          : Colors.greenAccent,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: message.loading
-                                            ?
-                                            Center(
-                                              child: SizedBox(
-                                                width: 40,
-                                                height: 40,
-                                                child: CircularProgressIndicator()
+                                              : Colors.greenAccent,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: AnimatedCrossFade(
+
+                                              crossFadeState: message.loading
+                                                  ? CrossFadeState.showFirst
+                                                  : CrossFadeState.showSecond,
+                                              duration: index == 0 &&
+                                                  message.sender ==
+                                                      Sender.chatbot
+                                                  ? constants
+                                                  .fadeDurationBetweenProgressIndicatorAndMessage
+                                                  : Duration(milliseconds: 1),
+                                              firstChild: Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: SizedBox(
+                                                  // TODO: Remove this hardcoded value
+                                                  width: 40,
+                                                  height: 40,
+                                                  child: SpinKitThreeBounce(
+                                                    //TODO: Remove this hardcoded value
+                                                    size: 20,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
                                               ),
-                                            )
-                                            : Text(
+                                              secondChild: Text(
                                                 optionPresent
                                                     ? chatList[index]
-                                                        .option
-                                                        .queryForChatbot
+                                                    .option
+                                                    .queryForChatbot
                                                     : chatList[index].message,
                                                 style: Theme.of(context)
                                                     .textTheme
                                                     .bodyText1,
                                               ),
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                )),
-                          ],
-                        ),
-                      );
-                    });
-              } else {
-                return CircularProgressIndicator();
-              }
-            }),
+                                    )),
+                              ],
+                            ),
+                          );
+                        });
+                  } else {
+                    return CircularProgressIndicator();
+                  }
+                }),
           ),
           Divider(
             thickness: 1.0,
@@ -128,8 +146,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
                     child: TextFormField(
                       onFieldSubmitted: (String query) =>
                           clearTextBoxAndSendQuery(
-                        query: query,
-                      ),
+                            query: query,
+                          ),
                       //query from text controller will also work fine
                       style: Theme.of(context).textTheme.bodyText1,
                       decoration: InputDecoration(
@@ -140,7 +158,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                   color: Colors.red,
                                   style: BorderStyle.solid),
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(20.0)))),
+                              BorderRadius.all(Radius.circular(20.0)))),
                       controller: queryTextFormFieldController,
                     ),
                   ),
@@ -149,16 +167,16 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   padding: EdgeInsets.all(4.0),
                   child: ClipOval(
                       child: Tooltip(
-                    message: 'Send',
-                    preferBelow: false,
-                    child: IconButton(
-                      icon: Icon(Icons.send),
-                      iconSize: 30.0,
-                      onPressed: () => clearTextBoxAndSendQuery(
-                        query: queryTextFormFieldController.text,
-                      ),
-                    ),
-                  )),
+                        message: 'Send',
+                        preferBelow: false,
+                        child: IconButton(
+                          icon: Icon(Icons.send),
+                          iconSize: 30.0,
+                          onPressed: () => clearTextBoxAndSendQuery(
+                            query: queryTextFormFieldController.text,
+                          ),
+                        ),
+                      )),
                 )),
           ),
         ],
