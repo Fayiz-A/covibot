@@ -42,6 +42,10 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
       yield MessageAddedState(chatList: chatList);
 
       try {
+        await _addAnswerFromChatbot(message: '', loading: true);
+
+        yield MessageAddedState(chatList: chatList);
+
         await _initializeDialogflow();
         AIResponse aiResponse = await dialogflow.detectIntent(query);
 
@@ -50,17 +54,14 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
         String responseFromChatbot =
         responseListMessages[0]["text"]["text"][0].toString();
 
-        Message chatbotMessage =
-        Message(sender: Sender.chatbot, message: responseFromChatbot);
-
-        chatList.insert(0, chatbotMessage);
+        await _addAnswerFromChatbot(message: responseFromChatbot);
 
         if (responseListMessages.length == 2 &&
             responseListMessages[1]["payload"] != null) {
           List options = responseListMessages[1]["payload"]["options"];
 
           for (int index = 0; index < options.length; index++) {
-            _addAnswerFromChatbot(
+            await _addAnswerFromChatbot(
                 message: responseFromChatbot,
                 option: Option(
                     queryForChatbot: options[index]["query"],
@@ -72,20 +73,20 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
       } on SocketException catch (socketException) {
         await Future.delayed(constants.messageDurationForCornerCaseMessages);
 
-        _addAnswerFromChatbot(
+        await _addAnswerFromChatbot(
             message:
             'I am more intelligent when you are connected to the internet.');
       } catch (e) {
         await Future.delayed(constants.messageDurationForCornerCaseMessages);
 
-        _addAnswerFromChatbot(
+        await _addAnswerFromChatbot(
             message:
             'Oops! Looks like something went wrong with me. Just like humans get ill, I also sometimes get ill. Pray that I get well soon.');
       }
 
       yield MessageAddedState(chatList: chatList);
     } else if (event is SendMessageFromChatbotEvent) {
-      _addAnswerFromChatbot(message: event.message, option: event.option);
+      await _addAnswerFromChatbot(message: event.message, option: event.option);
       yield MessageAddedState(chatList: chatList);
     } else {
       yield InitialState();
@@ -98,9 +99,38 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
     dialogflow = Dialogflow(authGoogle: authGoogle, language: Language.english);
   }
 
-  void _addAnswerFromChatbot({Option option, @required String message}) {
-    chatList.insert(
-        0, Message(sender: Sender.chatbot, message: message, option: option));
+  Future<void> _addAnswerFromChatbot(
+      {Option option, @required String message, bool loading = false}) async {
+    if (chatList.length > 0 && chatList[0].loading == true) {
+      // for replacing the progress indicator with message
+      chatList[0] = Message(
+          sender: Sender.chatbot,
+          message: message,
+          option: option,
+          loading: false);
+    } else {
+
+      if (loading == true) {
+        //the one to be inserted is going to be true
+        //wait for some time to remove abruptness
+
+        await Future.delayed(constants.durationBeforeRenderingProgressIndicator);
+        // chatList.insert(
+        //     0,
+        //     Message(
+        //         sender: Sender.chatbot,
+        //         message: message,
+        //         option: option,
+        //         loading: loading));
+      }
+        chatList.insert(
+            0,
+            Message(
+                sender: Sender.chatbot,
+                message: message,
+                option: option,
+                loading: loading));
+    }
   }
 }
 

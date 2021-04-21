@@ -8,12 +8,14 @@ enum Sender {
 class Message {
   final String message;
   final Sender sender;
-  final Option option;//it is dynamic as the json was parsed that way
+  final Option option;
+  final bool loading;
 
   Message({
       @required this.message,
       @required this.sender,
-      this.option
+      this.option,
+      this.loading = false,
   });
 
 }
