@@ -1,4 +1,5 @@
 import 'package:covibot/blocs/chatbot_bloc.dart';
+import 'package:covibot/blocs/internet_connnection_bloc.dart';
 import 'package:covibot/screens/chatbot_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,9 +27,16 @@ class MyApp extends StatelessWidget {
             ),
           )
       ),
-      home: BlocProvider(
-          lazy: false,
-          create: (BuildContext context) => ChatbotBloc()..add(SendMessageFromChatbotEvent(message: constants.initialMessageFromChatbot)),
+      home: MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              lazy: false,
+              create: (BuildContext context) => ChatbotBloc()..add(SendMessageFromChatbotEvent(message: constants.initialMessageFromChatbot)),
+            ),
+            BlocProvider(
+              create: (BuildContext context) => InternetConnectionBloc(),
+            ),
+          ],
           child: SafeArea(top: false, child: ChatbotPage())),
     );
   }

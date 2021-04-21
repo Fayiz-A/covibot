@@ -23,7 +23,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
   clearTextBoxAndSendQuery({@required String query}) {
     queryTextFormFieldController.clear();
 
-    chatBloc.add(SendQueryEvent(query: query));
+    chatBloc.add(SendQueryAndYieldMessageEvent(query: query));
   }
 
   @override
