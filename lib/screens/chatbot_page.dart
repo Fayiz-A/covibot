@@ -4,6 +4,7 @@ import 'package:covibot/constants.dart' as constants;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ChatbotPage extends StatefulWidget {
   @override
@@ -33,7 +34,14 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('CoviBot'),
+        title: Text('CoviBot'.tr()),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.translate),
+        onPressed: () {
+          context.locale == Locale('en', 'UK') ? context.setLocale(Locale('hi', 'IN')):context.setLocale(Locale('en', 'UK'));
+          chatBloc.add(ToggleChatbotLocale());
+        },
       ),
       body: Column(
         children: [

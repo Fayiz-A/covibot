@@ -1,0 +1,7 @@
+{
+  "CoviBot": "Hindi",
+
+  "DefaultMessage": "Mai aapki madad kaise karon?",
+  "ErrorMessage": "Error message in hindi",
+  "NoInternetMessage" : "No internet message in hindi"
+}
