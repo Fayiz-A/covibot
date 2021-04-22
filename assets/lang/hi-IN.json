@@ -1,5 +1,10 @@
 {
   "CoviBot": "Hindi",
+  "SettingsPageTitle": "Settings Page in Hindi",
+  "DarkTheme": "Dark Theme in Hindi",
+  "Language": "Language in hindi",
+  "FontSize": "Font Size in hindi",
+  "FontFamily": "FontFamily",
 
   "DefaultMessage": "Mai aapki madad kaise karon?",
   "ErrorMessage": "Error message in hindi",
