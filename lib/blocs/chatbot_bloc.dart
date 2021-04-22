@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:covibot/classes/general_functions/language.dart';
 import 'package:covibot/classes/message.dart';
 import 'package:covibot/constants.dart' as constants;
 import 'package:flutter/material.dart';
@@ -21,12 +22,17 @@ class SendMessageFromChatbotEvent extends ChatbotEvent {
   SendMessageFromChatbotEvent({@required this.message, this.option});
 }
 
+//TODO: Refactor this to change chatbot locale and introduce parameters for accepting locale. Right now it is toggle as there are only two locales en-UK and hi-IN
+class ToggleChatbotLocale extends ChatbotEvent {}
+
 class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
   Dialogflow dialogflow;
 
   ChatbotBloc() : super(InitialState());
 
   List<Message> chatList = [];
+
+  Locale chatbotLocale;
 
   @override
   Stream<ChatbotState> mapEventToState(ChatbotEvent event) async* {
@@ -75,28 +81,43 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
 
         await _addAnswerFromChatbot(
             message:
-            'I am more intelligent when you are connected to the internet.');
+            constants.noInternetMessage);
       } catch (e) {
         await Future.delayed(constants.messageDurationForCornerCaseMessages);
 
         await _addAnswerFromChatbot(
             message:
-            'Oops! Looks like something went wrong with me. Just like humans get ill, I also sometimes get ill. Pray that I get well soon.');
+        constants.errorMessage);
+
+        print('Error occurred in dialogflow message $e');
       }
 
       yield MessageAddedState(chatList: chatList);
     } else if (event is SendMessageFromChatbotEvent) {
       await _addAnswerFromChatbot(message: event.message, option: event.option);
       yield MessageAddedState(chatList: chatList);
+    } else if (event is ToggleChatbotLocale) {
+      chatbotLocale == Locale('en', 'UK')
+          ? chatbotLocale = Locale('hi', 'IN')
+          : chatbotLocale = Locale('en', 'UK');
     } else {
       yield InitialState();
     }
   }
 
   Future<void> _initializeDialogflow() async {
+    String _language;
+    if (checkLocaleEquality(chatbotLocale, Locale('en', 'UK'))) {
+      _language = Language.english;
+    } else if (checkLocaleEquality(chatbotLocale, Locale('hi', 'IN'))) {
+      _language = Language.hindi;
+    } else {
+      _language = Language.english;
+    }
+
     AuthGoogle authGoogle =
     await AuthGoogle(fileJson: "assets/services.json").build();
-    dialogflow = Dialogflow(authGoogle: authGoogle, language: Language.english);
+    dialogflow = Dialogflow(authGoogle: authGoogle, language: _language);
   }
 
   Future<void> _addAnswerFromChatbot(
@@ -109,21 +130,20 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
           option: option,
           loading: false);
     } else {
-
       if (loading == true) {
         //the one to be inserted is going to be true
         //wait for some time to remove abruptness
 
-        await Future.delayed(constants.durationBeforeRenderingProgressIndicator);
-
+        await Future.delayed(
+            constants.durationBeforeRenderingProgressIndicator);
       }
-        chatList.insert(
-            0,
-            Message(
-                sender: Sender.chatbot,
-                message: message,
-                option: option,
-                loading: loading));
+      chatList.insert(
+          0,
+          Message(
+              sender: Sender.chatbot,
+              message: message,
+              option: option,
+              loading: loading));
     }
   }
 }
