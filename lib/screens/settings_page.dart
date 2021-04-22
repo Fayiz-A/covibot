@@ -7,23 +7,49 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+
+    SettingsBloc settingsBloc = BlocProvider.of<SettingsBloc>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('SettingsPageTitle'.tr()),
       ),
       body: Column(
         children: [
-          SwitchListTile.adaptive(
-              title: Text('DarkTheme'.tr()),
-              value: true,
-              onChanged: (bool value) {}
-          ),
+          SettingsSwitch(name: 'DarkTheme'.tr(), onChanged: (bool value) => settingsBloc.add(ToggleThemeEvent())),
           SettingsDropdown(name: 'Language'.tr()),
           SettingsDropdown(name: 'FontSize'.tr()),
           SettingsDropdown(name: 'FontFamily'.tr()),
-          ListTile(title: Text('Testing theme'), onTap: () => BlocProvider.of<SettingsBloc>(context)..add(ToggleThemeEvent()),),
         ],
       ),
+    );
+  }
+}
+
+class SettingsSwitch extends StatefulWidget {
+
+  final String name;
+  final Function(bool value) onChanged ;
+
+  const SettingsSwitch({@required this.name, @required this.onChanged});
+
+  @override
+  _SettingsSwitchState createState() => _SettingsSwitchState();
+}
+
+class _SettingsSwitchState extends State<SettingsSwitch> {
+  bool _value = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile.adaptive(
+        title: Text(widget.name),
+        value: _value,
+        onChanged: (bool value) {
+          widget.onChanged(value);
+
+          setState(() => _value = value == true);
+        }
     );
   }
 }
