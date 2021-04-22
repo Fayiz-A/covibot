@@ -1,5 +1,10 @@
 {
   "CoviBot": "CoviBot",
+  "SettingsPageTitle": "Settings Page",
+  "DarkTheme": "Dark Theme",
+  "Language": "Language",
+  "FontSize": "Font Size",
+  "FontFamily": "Font Family",
 
   "DefaultMessage": "Hi, how may I assist you?",
   "ErrorMessage": "Oops! Looks like something went wrong with me. Just like humans get ill, I also sometimes get ill. Pray that I get well soon.",
