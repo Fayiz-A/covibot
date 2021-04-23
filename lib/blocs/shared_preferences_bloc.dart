@@ -38,6 +38,7 @@ class SharedPreferencesBloc extends Bloc<SharedPreferencesEvent, SharedPreferenc
 
     if(event is InitializeEvent) {
       prefs = await SharedPreferences.getInstance();
+      yield InitializedState();
     } else if (event is GetEvent) {
       var value = prefs.get(event.key);
 
@@ -69,6 +70,8 @@ class SharedPreferencesBloc extends Bloc<SharedPreferencesEvent, SharedPreferenc
 abstract class SharedPreferencesState {}
 
 class InitialState extends SharedPreferencesState {}
+
+class InitializedState extends SharedPreferencesState {}
 
 class ValueSavedState extends SharedPreferencesState {}
 
