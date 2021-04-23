@@ -41,7 +41,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
 
   List<Message> chatList = [];
 
-  Locale chatbotLocale;
+  Locale chatbotLocale = Locale('en', 'UK');
 
   @override
   Stream<ChatbotState> mapEventToState(ChatbotEvent event) async* {
@@ -117,7 +117,6 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
       yield MessageAddedState(chatList: chatList);
     } else if (event is ChangeChatbotLocale) {
       chatbotLocale = event.locale;
-
     } else {
       yield InitialState();
     }
@@ -125,6 +124,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
 
   Future<void> _initializeDialogflow() async {
     String _language;
+
     if (checkLocaleEquality(chatbotLocale, Locale('en', 'UK'))) {
       _language = Language.english;
     } else if (checkLocaleEquality(chatbotLocale, Locale('hi', 'IN'))) {

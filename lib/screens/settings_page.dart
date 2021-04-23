@@ -1,3 +1,4 @@
+import 'package:covibot/blocs/chatbot_bloc.dart';
 import 'package:covibot/blocs/settings_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -32,8 +33,8 @@ class SettingsPage extends StatelessWidget {
           SettingsDropdown(
             name: 'Language'.tr(),
             onOptionSelected: (option) {
-              settingsBloc.add(ChangeLanguageEvent(option));
               context.setLocale(option);
+              BlocProvider.of<ChatbotBloc>(context)..add(ChangeChatbotLocale(option));
             },
             dropdownTextValueList: [
               {'English': Locale('en', 'UK')},
@@ -119,7 +120,6 @@ class _SettingsDropdownState extends State<SettingsDropdown> {
           });
           widget.onOptionSelected(option);
         },
-        hint: Text('hey'),
         items: widget.dropdownTextValueList.map((textValue) {
           return DropdownMenuItem(
             //map with only one key and one value

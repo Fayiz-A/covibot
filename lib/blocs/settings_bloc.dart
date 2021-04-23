@@ -1,4 +1,3 @@
-import 'package:covibot/blocs/chatbot_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -36,8 +35,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       fontSize = event.fontSize;
 
     } else if(event is ChangeLanguageEvent) {
-      ChatbotBloc chatbotBloc = ChatbotBloc();
-      chatbotBloc.add(ChangeChatbotLocale(event.locale));
+      //do something
     }
 
     yield ThemeChangedState(themeMode: themeMode, fontSize: fontSize);
