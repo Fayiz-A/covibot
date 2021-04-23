@@ -89,13 +89,6 @@ class _ChatbotPageState extends State<ChatbotPage> {
           ),
         ],
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   child: Icon(Icons.translate),
-      //   onPressed: () {
-      //     context.locale == Locale('en', 'UK') ? context.setLocale(Locale('hi', 'IN')):context.setLocale(Locale('en', 'UK'));
-      //     chatBloc.add(ToggleChatbotLocale());
-      //   },
-      // ),
       body: Column(
         children: [
           Flexible(
@@ -191,7 +184,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                           );
                         });
                   } else {
-                    return CircularProgressIndicator();
+                    return Container();
                   }
                 }),
           ),
