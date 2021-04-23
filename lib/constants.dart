@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 
 const String emptyStringQuery = 'nothing in query with passcode abc@77';
-String initialMessageFromChatbot = 'DefaultMessage'.tr();
+String initialMessageFromChatbot = 'DefaultMessage';
 String noInternetMessage = 'noInternetMessage'.tr();
 String errorMessage = 'errorMessage'.tr();
 
