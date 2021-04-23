@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:covibot/classes/general_functions/language.dart';
@@ -6,6 +7,8 @@ import 'package:covibot/constants.dart' as constants;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dialogflow/dialogflow_v2.dart';
+
+import 'package:http/http.dart' as http;
 
 abstract class ChatbotEvent {}
 
@@ -60,7 +63,17 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
         String responseFromChatbot =
         responseListMessages[0]["text"]["text"][0].toString();
 
+
         await _addAnswerFromChatbot(message: responseFromChatbot);
+
+        // print(aiResponse.queryResult.action);
+        //
+        // if(aiResponse.queryResult.action == 'fetch_plasma') {
+        //
+        //   var httpResponse = await http.get('https://life-api.coronasafe.network/data/plasma.json');
+        //   var message = await jsonDecode(httpResponse.body);
+        //   await _addAnswerFromChatbot(message: message.toString());
+        // }
 
         if (responseListMessages.length == 2 &&
             responseListMessages[1]["payload"] != null) {

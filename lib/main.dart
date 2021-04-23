@@ -26,7 +26,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Locale locale = context.locale;
-    print(locale);
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -42,7 +41,6 @@ class MyApp extends StatelessWidget {
       ],
       child: BlocBuilder<SettingsBloc, SettingsState>(
         builder: (BuildContext context, SettingsState state) {
-          print(state.themeData.brightness);
           return MaterialApp(
             title: 'CoviBot',
             localizationsDelegates: context.localizationDelegates,
@@ -56,12 +54,12 @@ class MyApp extends StatelessWidget {
                 create: (BuildContext context) => ChatbotBloc()
                   ..chatbotLocale = locale
                   ..add(SendMessageFromChatbotEvent(
-                      message: constants.initialMessageFromChatbot)),
+                      message: constants.initialMessageFromChatbot.tr())),
               ),
               BlocProvider(
                 create: (BuildContext context) => InternetConnectionBloc(),
               ),
-            ], child: SafeArea(top: false, child: ChatbotPage())),
+            ], child: SafeArea(top: false, child: SettingsPage())),
           );
         }
       ),
