@@ -26,14 +26,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Locale locale = context.locale;
+
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          lazy: false,
           create: (BuildContext context) => ChatbotBloc()
-            ..chatbotLocale = locale
+            ..add(ChangeChatbotLocale(locale))
             ..add(SendMessageFromChatbotEvent(
-                message: constants.initialMessageFromChatbot)),
+                message: constants.initialMessageFromChatbot.tr()))
         ),
         BlocProvider(
           create: (BuildContext context) => SettingsBloc(),
@@ -80,18 +80,7 @@ class MyApp extends StatelessWidget {
                       color: Colors.white.withOpacity(0.6),
                     ),
                   )),
-              home: MultiBlocProvider(providers: [
-                BlocProvider(
-                  lazy: false,
-                  create: (BuildContext context) => ChatbotBloc()
-                    ..chatbotLocale = locale
-                    ..add(SendMessageFromChatbotEvent(
-                        message: constants.initialMessageFromChatbot.tr())),
-                ),
-                BlocProvider(
-                  create: (BuildContext context) => InternetConnectionBloc(),
-                ),
-              ], child: SafeArea(top: false, child: ChatbotPage())),
+              home: SafeArea(top: false, child: ChatbotPage()),
             );
           }),
     );
