@@ -36,33 +36,64 @@ class MyApp extends StatelessWidget {
                 message: constants.initialMessageFromChatbot)),
         ),
         BlocProvider(
-            create: (BuildContext context) => SettingsBloc(),
+          create: (BuildContext context) => SettingsBloc(),
         ),
       ],
       child: BlocBuilder<SettingsBloc, SettingsState>(
-        builder: (BuildContext context, SettingsState state) {
-          return MaterialApp(
-            title: 'CoviBot',
-            localizationsDelegates: context.localizationDelegates,
-            supportedLocales: context.supportedLocales,
-            locale: context.locale,
-            debugShowCheckedModeBanner: false,
-            theme: state.themeData,
-            home: MultiBlocProvider(providers: [
-              BlocProvider(
-                lazy: false,
-                create: (BuildContext context) => ChatbotBloc()
-                  ..chatbotLocale = locale
-                  ..add(SendMessageFromChatbotEvent(
-                      message: constants.initialMessageFromChatbot.tr())),
-              ),
-              BlocProvider(
-                create: (BuildContext context) => InternetConnectionBloc(),
-              ),
-            ], child: SafeArea(top: false, child: SettingsPage())),
-          );
-        }
-      ),
+          builder: (BuildContext context, SettingsState state) {
+            return MaterialApp(
+              title: 'CoviBot',
+              localizationsDelegates: context.localizationDelegates,
+              supportedLocales: context.supportedLocales,
+              locale: context.locale,
+              debugShowCheckedModeBanner: false,
+              themeMode: state.themeMode,
+              theme: ThemeData.light().copyWith(
+                  primaryColor: Colors.red,
+                  splashFactory: InkRipple.splashFactory,
+                  brightness: Brightness.light,
+                  textTheme: ThemeData.light().textTheme.copyWith(
+                    bodyText1: ThemeData.light()
+                        .textTheme
+                        .bodyText1
+                        .copyWith(fontSize: state.fontSize),
+                  ),
+                  tooltipTheme: TooltipThemeData(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                      color: Colors.black.withOpacity(0.6),
+                    ),
+                  )),
+              darkTheme: ThemeData.dark().copyWith(
+                  primaryColor: Colors.red,
+                  splashFactory: InkRipple.splashFactory,
+                  brightness: Brightness.dark,
+                  textTheme: ThemeData.dark().textTheme.copyWith(
+                    bodyText1: ThemeData.dark()
+                        .textTheme
+                        .bodyText1
+                        .copyWith(fontSize: state.fontSize),
+                  ),
+                  tooltipTheme: TooltipThemeData(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                      color: Colors.white.withOpacity(0.6),
+                    ),
+                  )),
+              home: MultiBlocProvider(providers: [
+                BlocProvider(
+                  lazy: false,
+                  create: (BuildContext context) => ChatbotBloc()
+                    ..chatbotLocale = locale
+                    ..add(SendMessageFromChatbotEvent(
+                        message: constants.initialMessageFromChatbot.tr())),
+                ),
+                BlocProvider(
+                  create: (BuildContext context) => InternetConnectionBloc(),
+                ),
+              ], child: SafeArea(top: false, child: ChatbotPage())),
+            );
+          }),
     );
   }
 }

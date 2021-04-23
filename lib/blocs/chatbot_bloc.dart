@@ -26,7 +26,13 @@ class SendMessageFromChatbotEvent extends ChatbotEvent {
 }
 
 //TODO: Refactor this to change chatbot locale and introduce parameters for accepting locale. Right now it is toggle as there are only two locales en-UK and hi-IN
-class ToggleChatbotLocale extends ChatbotEvent {}
+class ChangeChatbotLocale extends ChatbotEvent {
+
+  final Locale locale;
+
+  ChangeChatbotLocale(this.locale);
+
+}
 
 class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
   Dialogflow dialogflow;
@@ -109,10 +115,9 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
     } else if (event is SendMessageFromChatbotEvent) {
       await _addAnswerFromChatbot(message: event.message, option: event.option);
       yield MessageAddedState(chatList: chatList);
-    } else if (event is ToggleChatbotLocale) {
-      chatbotLocale == Locale('en', 'UK')
-          ? chatbotLocale = Locale('hi', 'IN')
-          : chatbotLocale = Locale('en', 'UK');
+    } else if (event is ChangeChatbotLocale) {
+      chatbotLocale = event.locale;
+
     } else {
       yield InitialState();
     }
