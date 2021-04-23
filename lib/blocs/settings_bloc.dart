@@ -1,5 +1,4 @@
 import 'package:covibot/blocs/chatbot_bloc.dart';
-import 'package:covibot/widgets/theme.dart' as theme;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,42 +12,49 @@ class ChangeFontStyleEvent extends SettingsEvent {
   ChangeFontStyleEvent({@required this.fontSize});
 }
 
-class ToggleLanguageEvent extends SettingsEvent {}
+class ChangeLanguageEvent extends SettingsEvent {
+  final Locale locale;
+
+  ChangeLanguageEvent(this.locale);
+}
 
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
-  SettingsBloc() : super(ThemeChangedState(themeData: theme.initialThemeData));
+  SettingsBloc() : super(ThemeChangedState(themeMode: ThemeMode.light, fontSize: 20.0));
+
+  ThemeMode themeMode = ThemeMode.light;
+  double fontSize = 20.0;
 
   @override
   Stream<SettingsState> mapEventToState(SettingsEvent event) async* {
     if (event is ToggleThemeEvent) {
-      // theme.themeData.brightness == Brightness.light ? theme.themeData = theme.darkThemeData:theme.themeData = theme.lightThemeData;
+
+      themeMode = themeMode == ThemeMode.light ? ThemeMode.dark:ThemeMode.light;
 
     } else if(event is ChangeFontStyleEvent) {
-      theme.themeData = theme.themeData.copyWith(
-          textTheme: TextTheme(
-              bodyText1: TextStyle(fontSize: event.fontSize)
-          )
-      );
-    } else if(event is ToggleLanguageEvent) {
+
+      fontSize = event.fontSize;
+
+    } else if(event is ChangeLanguageEvent) {
       ChatbotBloc chatbotBloc = ChatbotBloc();
-      chatbotBloc.add(ToggleChatbotLocale());
+      chatbotBloc.add(ChangeChatbotLocale(event.locale));
     }
 
-    yield ThemeChangedState(themeData: theme.themeData);
+    yield ThemeChangedState(themeMode: themeMode, fontSize: fontSize);
   }
 }
 
 abstract class SettingsState {
-  final ThemeData themeData;
+  final ThemeMode themeMode;
+  final double fontSize;
 
-  SettingsState({@required this.themeData});
-
+  SettingsState(this.themeMode,this.fontSize);
 }
 
 class ThemeChangedState extends SettingsState {
-  final ThemeData themeData;
+  final ThemeMode themeMode;
+  final double fontSize;
 
-  ThemeChangedState({@required this.themeData}): super(themeData: themeData);
+  ThemeChangedState({@required this.themeMode, @required this.fontSize}) :super(themeMode, fontSize);
 
 }

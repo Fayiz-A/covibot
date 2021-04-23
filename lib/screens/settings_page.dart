@@ -27,17 +27,19 @@ class SettingsPage extends StatelessWidget {
               {'20': 20.0},
               {'25': 25.0}
             ],
+            defaultValue: 20.0,
           ),
           SettingsDropdown(
             name: 'Language'.tr(),
             onOptionSelected: (option) {
-              settingsBloc.add(ToggleLanguageEvent());
+              settingsBloc.add(ChangeLanguageEvent(option));
               context.setLocale(option);
             },
             dropdownTextValueList: [
               {'English': Locale('en', 'UK')},
               {'Hindi': Locale('hi', 'IN')}
             ],
+              defaultValue: Locale('en', 'UK')
           ),
         ],
       ),
@@ -79,26 +81,45 @@ class SettingsDropdown extends StatefulWidget {
   final Function(dynamic option)
       onOptionSelected; //it is dynamic from the framework itself
   final List<Map<String, dynamic>> dropdownTextValueList;
+  final defaultValue;
 
   SettingsDropdown(
       {@required this.name,
       @required this.onOptionSelected,
-      @required this.dropdownTextValueList});
+      @required this.dropdownTextValueList,
+      @required this.defaultValue});
 
   @override
   _SettingsDropdownState createState() => _SettingsDropdownState();
 }
 
 class _SettingsDropdownState extends State<SettingsDropdown> {
+
+  var _value;
+
+  @override
+  void initState() {
+    super.initState();
+    _value = widget.defaultValue;
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return ListTile(
       title: Text(
         widget.name,
         style: Theme.of(context).textTheme.bodyText1,
       ),
       trailing: DropdownButton(
-        onChanged: (option) => widget.onOptionSelected(option),
+        value: _value,
+        onChanged: (option) {
+          setState(() {
+            _value = option;
+          });
+          widget.onOptionSelected(option);
+        },
+        hint: Text('hey'),
         items: widget.dropdownTextValueList.map((textValue) {
           return DropdownMenuItem(
             //map with only one key and one value
@@ -106,14 +127,6 @@ class _SettingsDropdownState extends State<SettingsDropdown> {
             value: textValue.values.first,
           );
         }).toList(),
-        // DropdownMenuItem(
-        //   child: Text('16'),
-        //   value: 16.0,
-        // ),
-        // DropdownMenuItem(
-        //   child: Text('30'),
-        //   value: 30.0,
-        // )
       ),
     );
   }
