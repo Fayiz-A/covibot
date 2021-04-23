@@ -17,16 +17,31 @@ class ChangeLanguageEvent extends SettingsEvent {
   ChangeLanguageEvent(this.locale);
 }
 
+class SetInitialValuesEvent extends SettingsEvent {
+  final double fontSize;
+  final Locale locale;
+  final ThemeMode themeMode;
+
+  SetInitialValuesEvent({@required this.fontSize, @required this.locale, @required this.themeMode});
+}
+
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   SettingsBloc() : super(ThemeChangedState(themeMode: ThemeMode.light, fontSize: 20.0));
 
   ThemeMode themeMode = ThemeMode.light;
   double fontSize = 20.0;
+  Locale locale = Locale('en', 'UK');
 
   @override
   Stream<SettingsState> mapEventToState(SettingsEvent event) async* {
-    if (event is ToggleThemeEvent) {
+
+    if(event is SetInitialValuesEvent) {
+      themeMode = event.themeMode;
+      fontSize = event.fontSize;
+      locale = event.locale;
+
+    } else if (event is ToggleThemeEvent) {
 
       themeMode = themeMode == ThemeMode.light ? ThemeMode.dark:ThemeMode.light;
 
