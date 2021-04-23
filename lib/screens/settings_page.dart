@@ -1,5 +1,6 @@
 import 'package:covibot/blocs/chatbot_bloc.dart';
 import 'package:covibot/blocs/settings_bloc.dart';
+import 'package:covibot/blocs/shared_preferences.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +9,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SettingsBloc settingsBloc = BlocProvider.of<SettingsBloc>(context);
+    SharedPreferencesBloc sharedPreferencesBloc = BlocProvider.of<SharedPreferencesBloc>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -17,12 +19,16 @@ class SettingsPage extends StatelessWidget {
         children: [
           SettingsSwitch(
               name: 'DarkTheme'.tr(),
-              onChanged: (bool value) => settingsBloc.add(ToggleThemeEvent())),
-          // SettingsSwitch(name: 'FontSize'.tr(), onChanged: (bool value) => settingsBloc.add(ChangeFontStyleEvent())),
+              initialValue: false,
+              onChanged: (bool value) {
+                settingsBloc.add(ToggleThemeEvent());
+                sharedPreferencesBloc.add(SaveEvent(type: TypeEnum.boolean, value: value, key: 'darkTheme'));
+              }),
           SettingsDropdown(
             name: 'FontSize'.tr(),
             onOptionSelected: (option) {
               settingsBloc.add(ChangeFontStyleEvent(fontSize: option));
+              sharedPreferencesBloc.add(SaveEvent(type: TypeEnum.double, value: option, key: 'fontSize'));
             },
             dropdownTextValueList: [
               {'20': 20.0},
@@ -35,13 +41,24 @@ class SettingsPage extends StatelessWidget {
             onOptionSelected: (option) {
               context.setLocale(option);
               BlocProvider.of<ChatbotBloc>(context)..add(ChangeChatbotLocale(option));
+              String _option;
+
+              if(option == Locale('en', 'UK')) {
+                _option = 'english';
+              } else if(option == Locale('hi', 'IN')) {
+                _option = 'hindi';
+              } else {
+                _option = 'english';
+              }
+
+              sharedPreferencesBloc.add(SaveEvent(type: TypeEnum.string, value: _option, key: 'language'));
             },
             dropdownTextValueList: [
               {'English': Locale('en', 'UK')},
               {'Hindi': Locale('hi', 'IN')}
             ],
-              defaultValue: Locale('en', 'UK')
-          ),
+              defaultValue: Locale('en', 'UK'),
+    ),
         ],
       ),
     );
@@ -51,15 +68,23 @@ class SettingsPage extends StatelessWidget {
 class SettingsSwitch extends StatefulWidget {
   final String name;
   final Function(bool value) onChanged;
+  final bool initialValue;
 
-  const SettingsSwitch({@required this.name, @required this.onChanged});
+  const SettingsSwitch({@required this.name, @required this.onChanged, @required this.initialValue});
 
   @override
   _SettingsSwitchState createState() => _SettingsSwitchState();
 }
 
 class _SettingsSwitchState extends State<SettingsSwitch> {
-  bool _value = false;
+
+  bool _value;
+
+  @override
+  void initState() {
+    super.initState();
+    _value = widget.initialValue;
+  }
 
   @override
   Widget build(BuildContext context) {
