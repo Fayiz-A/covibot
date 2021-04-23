@@ -1,4 +1,6 @@
 import 'package:covibot/blocs/chatbot_bloc.dart';
+import 'package:covibot/blocs/settings_bloc.dart';
+import 'package:covibot/blocs/shared_preferences_bloc.dart';
 import 'package:covibot/classes/message.dart';
 import 'package:covibot/constants.dart' as constants;
 import 'package:covibot/screens/settings_page.dart';
@@ -22,6 +24,36 @@ class _ChatbotPageState extends State<ChatbotPage> {
   void initState() {
     super.initState();
     chatBloc = BlocProvider.of<ChatbotBloc>(context);
+
+    SharedPreferencesBloc sharedPreferencesBloc = BlocProvider.of<SharedPreferencesBloc>(context);
+
+    ThemeMode _themeMode;
+    double _fontSize;
+
+    sharedPreferencesBloc.stream.listen((state) {
+      if(state is InitializedState) {
+        sharedPreferencesBloc.add(GetEvent('fontSize'));
+        sharedPreferencesBloc.add(GetEvent('darkTheme'));
+      }
+      if(state is ValueRetrievedState) {
+        var value = state.value;
+
+        if(value.runtimeType == double) {
+          _fontSize = value;
+        } else if(value.runtimeType == bool) {
+          _themeMode = value == true ? ThemeMode.dark:ThemeMode.light;
+        }
+        if(_fontSize != null && _themeMode != null) {
+
+          SettingsBloc settingsBloc = BlocProvider.of<SettingsBloc>(context);
+          settingsBloc.add(SetInitialValuesEvent(
+              fontSize: _fontSize,
+              locale: context.locale,
+              themeMode: _themeMode
+          ));
+        }
+      }
+    });
   }
 
   clearTextBoxAndSendQuery({@required String query}) {

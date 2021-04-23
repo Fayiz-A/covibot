@@ -29,7 +29,7 @@ class SetInitialValuesEvent extends SettingsEvent {
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   SettingsBloc() : super(ThemeChangedState(themeMode: ThemeMode.light, fontSize: 20.0));
 
-  ThemeMode themeMode = ThemeMode.light;
+  ThemeMode themeMode = ThemeMode.dark;
   double fontSize = 20.0;
   Locale locale = Locale('en', 'UK');
 

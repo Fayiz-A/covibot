@@ -1,7 +1,7 @@
 import 'package:covibot/blocs/chatbot_bloc.dart';
 import 'package:covibot/blocs/internet_connnection_bloc.dart';
 import 'package:covibot/blocs/settings_bloc.dart';
-import 'package:covibot/blocs/shared_preferences.dart';
+import 'package:covibot/blocs/shared_preferences_bloc.dart';
 import 'package:covibot/constants.dart' as constants;
 import 'package:covibot/screens/chatbot_page.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -31,16 +31,16 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
+          create: (BuildContext context) => SharedPreferencesBloc()..add(InitializeEvent()),
+        ),
+        BlocProvider(
           create: (BuildContext context) => ChatbotBloc()
             ..add(ChangeChatbotLocale(locale))
             ..add(SendMessageFromChatbotEvent(
                 message: constants.initialMessageFromChatbot.tr()))
         ),
         BlocProvider(
-          create: (BuildContext context) => SettingsBloc(),
-        ),
-        BlocProvider(
-          create: (BuildContext context) => SharedPreferencesBloc()..add(InitializeEvent()),
+          create: (BuildContext context) => SettingsBloc()..add(SetInitialValuesEvent(themeMode: ThemeMode.dark, fontSize: 20.0, locale: Locale('en', 'UK'))),
         ),
       ],
       child: BlocBuilder<SettingsBloc, SettingsState>(
