@@ -27,6 +27,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
     SharedPreferencesBloc sharedPreferencesBloc = BlocProvider.of<SharedPreferencesBloc>(context);
 
+    SettingsBloc settingsBloc = BlocProvider.of<SettingsBloc>(context);
+
     ThemeMode _themeMode;
     double _fontSize;
 
@@ -38,14 +40,24 @@ class _ChatbotPageState extends State<ChatbotPage> {
       if(state is ValueRetrievedState) {
         var value = state.value;
 
-        if(value.runtimeType == double) {
-          _fontSize = value;
-        } else if(value.runtimeType == bool) {
-          _themeMode = value == true ? ThemeMode.dark:ThemeMode.light;
-        }
-        if(_fontSize != null && _themeMode != null) {
+        if(value != null) {
+          if(value.runtimeType == double) {
+            _fontSize = value;
+          } else if(value.runtimeType == bool) {
+            _themeMode = value == true ? ThemeMode.dark:ThemeMode.light;
+          }
+          if(_fontSize != null && _themeMode != null) {
 
-          SettingsBloc settingsBloc = BlocProvider.of<SettingsBloc>(context);
+            settingsBloc.add(SetInitialValuesEvent(
+                fontSize: _fontSize,
+                locale: context.locale,
+                themeMode: _themeMode
+            ));
+          }
+        } else {
+          _fontSize = constants.defaultFontSize;
+          _themeMode = constants.defaultThemeMode;
+
           settingsBloc.add(SetInitialValuesEvent(
               fontSize: _fontSize,
               locale: context.locale,
