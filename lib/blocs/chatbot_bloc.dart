@@ -238,10 +238,38 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
   Future<void> _sendMessageAccordingly(String actionType) async {
     switch (actionType) {
       case 'plasma':
-        List numberList =
-        dataFilteredList.map((data) => data["phone1"]).toList();
+        dataFilteredList.forEach(
+              (data) {
+            _addAnswerFromChatbot(
+              message:
+              'City: ${data['city'] ?? ''} \nDistrict: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nDescription: ${data['description'] ?? ''} \nSource: ${data['sourceLink'] ?? ''} ',
+            );
+          },
+        );
+        break;
+      case 'oxygen':
+        dataFilteredList.forEach(
+              (data) {
+            _addAnswerFromChatbot(
+              message:
+              'City: ${data['city'] ?? ''} \nDistrict: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nVerification: ${data['comment'] ?? ''} \nSource: ${data['sourceLink'] ?? ''} ',
+            );
+          },
+        );
+        break;
+      case 'helplinenumber':
+        dataFilteredList.forEach(
+              (data) {
+            _addAnswerFromChatbot(
+              message:
+              'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nDescription: ${data['description'] ?? ''} \nSource: ${data['source'] ?? ''} \nSource Url: ${data['sourceUrl'] ?? ''} ',
+            );
+          },
+        );
+        break;
+      default:
         await _addAnswerFromChatbot(
-            message: 'Phone no. ${numberList.join('\n').toString()}', waitForSometime: true);
+            message: constants.errorMessage, waitForSometime: true);
     }
   }
 }
