@@ -63,9 +63,10 @@ class MyApp extends StatelessWidget {
                         .copyWith(fontSize: state.fontSize),
                   ),
                   tooltipTheme: TooltipThemeData(
+                    textStyle: Theme.of(context).textTheme.bodyText1.copyWith(color: Colors.white),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                      color: Colors.black.withOpacity(0.6),
+                      color: Colors.black.withOpacity(0.7),
                     ),
                   )),
               darkTheme: ThemeData.dark().copyWith(
@@ -79,9 +80,10 @@ class MyApp extends StatelessWidget {
                         .copyWith(fontSize: state.fontSize),
                   ),
                   tooltipTheme: TooltipThemeData(
+                   textStyle: Theme.of(context).textTheme.bodyText1,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withOpacity(0.9),
                     ),
                   )),
               home: SafeArea(top: false, child: ChatbotPage()),
