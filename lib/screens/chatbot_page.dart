@@ -68,15 +68,17 @@ class _ChatbotPageState extends State<ChatbotPage> {
     });
   }
 
-  clearTextBoxAndSendQuery({@required String query}) {
+  clearTextBoxAndSendQuery({@required String query, String action, bool sendMessageToDialogflow = true}) {
     queryTextFormFieldController.clear();
 
-    chatBloc.add(SendQueryAndYieldMessageEvent(query: query));
+    print('sending permision: $sendMessageToDialogflow');
+    chatBloc.add(SendQueryAndYieldMessageEvent(query: query, action: action, sendMessageToDialogFlow: sendMessageToDialogflow));
   }
 
   @override
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
+    Message _message;
 
     return Scaffold(
       appBar: AppBar(
@@ -96,6 +98,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 builder: (BuildContext context, ChatbotState state) {
                   if (state is MessageAddedState) {
                     List<Message> chatList = state.chatList;
+                    _message = chatList[0];
 
                     return ListView.builder(
                         reverse: true,
@@ -129,7 +132,10 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                         onTap: () => optionPresent
                                             ? clearTextBoxAndSendQuery(
                                             query:
-                                            message.option.queryForChatbot)
+                                            message.option.queryForChatbot,
+                                            action: message.action,
+                                            sendMessageToDialogflow: message.sendMessageToDialogFlow
+                                        )
                                             : null,
                                         child: Container(
                                           width: screenSize.width * 0.7,
@@ -150,7 +156,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                                       Sender.chatbot
                                                   ? constants
                                                   .fadeDurationBetweenProgressIndicatorAndMessage
-                                                  : Duration(milliseconds: 1),
+                                                  : Duration(microseconds: 1),
                                               firstChild: Align(
                                                 alignment: Alignment.centerLeft,
                                                 child: SizedBox(
@@ -201,6 +207,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
                       onFieldSubmitted: (String query) =>
                           clearTextBoxAndSendQuery(
                             query: query,
+                            action: _message.action,
+                            sendMessageToDialogflow: _message.sendMessageToDialogFlow
                           ),
                       //query from text controller will also work fine
                       style: Theme.of(context).textTheme.bodyText1,
@@ -228,6 +236,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
                           iconSize: 30.0,
                           onPressed: () => clearTextBoxAndSendQuery(
                             query: queryTextFormFieldController.text,
+                            action: _message.action,
+                            sendMessageToDialogflow: _message.sendMessageToDialogFlow
                           ),
                         ),
                       )),
