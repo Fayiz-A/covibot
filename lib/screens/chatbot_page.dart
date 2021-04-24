@@ -172,25 +172,15 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                                   ),
                                                 ),
                                               ),
-                                              secondChild: AutolinkText(
-                                                onPhoneTap: (link) async {
-                                                  if (await canLaunch(link)) {
-                                                    await launch(link);
-                                                  } else {
-                                                    print('Could not launch $link');
-                                                  }
-                                                },
-                                                text: optionPresent
+                                              secondChild: Text(
+                                                optionPresent
                                                     ? chatList[index]
                                                     .option
                                                     .queryForChatbot
                                                     : chatList[index].message,
-                                                textStyle: Theme.of(context)
+                                                style: Theme.of(context)
                                                     .textTheme
                                                     .bodyText1,
-                                                linkStyle: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyText1.copyWith(color: Colors.blue,),
                                               ),
                                             ),
                                           ),
@@ -224,6 +214,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                           ),
                       //query from text controller will also work fine
                       style: Theme.of(context).textTheme.bodyText1,
+                      autocorrect: false,
                       decoration: InputDecoration(
                           hintText: 'Enter Your Query Here',
                           border: OutlineInputBorder(
