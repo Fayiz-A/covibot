@@ -40,7 +40,14 @@ dependencies:
   #no version specified to resolve conflicting dependencies
   http:
 
+  #for accessing shared preferences (no sql database for storage)
   shared_preferences: ^2.0.5
+
+  #for making links clickable easily
+  flutter_autolink_text: ^1.0.0+1
+
+  #for launching urls, phone no.s etc.
+  url_launcher: ^6.0.3
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

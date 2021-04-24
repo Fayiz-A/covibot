@@ -18,8 +18,8 @@ class SendQueryAndYieldMessageEvent extends ChatbotEvent {
 
   SendQueryAndYieldMessageEvent(
       {@required this.query,
-      this.action,
-      this.sendMessageToDialogFlow = false});
+        this.action,
+        this.sendMessageToDialogFlow = false});
 }
 
 class SendMessageFromChatbotEvent extends ChatbotEvent {
@@ -30,9 +30,9 @@ class SendMessageFromChatbotEvent extends ChatbotEvent {
 
   SendMessageFromChatbotEvent(
       {@required this.message,
-      this.option,
-      this.action,
-      this.sendMessageToDialogFlow = false});
+        this.option,
+        this.action,
+        this.sendMessageToDialogFlow = false});
 }
 
 //TODO: Refactor this to change chatbot locale and introduce parameters for accepting locale. Right now it is toggle as there are only two locales en-UK and hi-IN
@@ -80,19 +80,27 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
           List responseListMessages = aiResponse.getListMessage();
 
           String responseFromChatbot =
-              responseListMessages[0]["text"]["text"][0].toString();
+          responseListMessages[0]["text"]["text"][0].toString();
 
           String action = aiResponse.queryResult.action;
 
           print(action);
 
-          if (action.contains(constants.apiFetchKeyword) && responseListMessages.length == 2 && responseListMessages[1]["payload"] != null) {
-            actionType = action.substring(constants.apiFetchKeyword.length);
-            var httpResponse = await http
-                .get(responseListMessages[1]["payload"]["api"]);
+          if (action.contains(constants.apiFetchKeyword) &&
+              responseListMessages.length == 2 &&
+              responseListMessages[1]["payload"] != null) {
+            actionType = action
+                .substring(constants.apiFetchKeyword.length)
+                .trim()
+                .toLowerCase();
+            var httpResponse =
+            await http.get(responseListMessages[1]["payload"]["api"]);
             apiResonse = jsonDecode(httpResponse.body);
 
-            await _addAnswerFromChatbot(message: responseFromChatbot, action: 'askDistrict', sendMessageToDialogflow: false);
+            await _addAnswerFromChatbot(
+                message: responseFromChatbot,
+                action: 'askDistrict',
+                sendMessageToDialogflow: false);
           } else {
             await _addAnswerFromChatbot(message: responseFromChatbot);
           }
@@ -112,34 +120,53 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
 
           print('response: $responseFromChatbot');
         } else {
-          if (event.action == "askDistrict") {
+          if (event.action == 'askDistrict') {
+            dataFilteredList = apiResonse["data"]
+                .where((data) => data["state"]
+                .toLowerCase()
+                .trim()
+                .contains(query.toLowerCase().trim())
+                ? true
+                : false)
+                .toList();
 
-            dataFilteredList = apiResonse["data"].where((data) => data["state"].toLowerCase().trim().contains(query.toLowerCase().trim()) ? true:false).toList();
-
-            if(dataFilteredList.length <= 0) {
-              await _addAnswerFromChatbot(message: 'Sorry. We do not have data for this state right now');
+            if (dataFilteredList.length <= 0) {
+              await _addAnswerFromChatbot(
+                  message:
+                  'Sorry. We do not have data for this state right now',
+                  waitForSometime: true);
             } else {
-              await _addAnswerFromChatbot(message: 'Please enter your district.', action: 'fetchPlasma', sendMessageToDialogflow: false);
+              await _addAnswerFromChatbot(
+                  message: 'Please enter your district.',
+                  action: 'fetchResult',
+                  sendMessageToDialogflow: false,
+                  waitForSometime: true);
             }
-          } else if(event.action == 'fetchPlasma') {
-            dataFilteredList = dataFilteredList.where((data) => data["district"].toLowerCase().trim().contains(query.toLowerCase().trim())).toList();
+          } else if (event.action == 'fetchResult') {
+            dataFilteredList = dataFilteredList
+                .where((data) => data["district"]
+                .toLowerCase()
+                .trim()
+                .contains(query.toLowerCase().trim()))
+                .toList();
 
-            if(dataFilteredList.length <= 0) {
-              await _addAnswerFromChatbot(message: 'Sorry. We do not have data for this district right now');
+            if (dataFilteredList.length <= 0) {
+              await _addAnswerFromChatbot(
+                  message:
+                  'Sorry. We do not have data for this district right now',
+                  waitForSometime: true);
             } else {
-              List numberList = dataFilteredList.map((data) => data["phone1"]).toList();
-              await _addAnswerFromChatbot(message: numberList.join('\n').toString());
+              print(actionType);
+              await _sendMessageAccordingly(actionType);
             }
           }
         }
       } on SocketException catch (socketException) {
-        await Future.delayed(constants.messageDurationForCornerCaseMessages);
-
-        await _addAnswerFromChatbot(message: constants.noInternetMessage);
+        await _addAnswerFromChatbot(
+            message: constants.noInternetMessage, waitForSometime: true);
       } catch (e) {
-        await Future.delayed(constants.messageDurationForCornerCaseMessages);
-
-        await _addAnswerFromChatbot(message: constants.errorMessage);
+        await _addAnswerFromChatbot(
+            message: constants.errorMessage, waitForSometime: true);
 
         print('Error occurred in dialogflow message $e');
       }
@@ -167,16 +194,20 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
     }
 
     AuthGoogle authGoogle =
-        await AuthGoogle(fileJson: "assets/services.json").build();
+    await AuthGoogle(fileJson: "assets/services.json").build();
     dialogflow = Dialogflow(authGoogle: authGoogle, language: _language);
   }
 
   Future<void> _addAnswerFromChatbot(
       {Option option,
-      @required String message,
-      bool loading = false,
-      bool sendMessageToDialogflow = true,
-      String action}) async {
+        @required String message,
+        bool loading = false,
+        bool sendMessageToDialogflow = true,
+        String action,
+        bool waitForSometime = false}) async {
+    if (waitForSometime)
+      await Future.delayed(constants.messageDurationForCornerCaseMessages);
+
     if (chatList.length > 0 && chatList[0].loading == true) {
       // for replacing the progress indicator with message
       chatList[0] = Message(
@@ -201,6 +232,16 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
               message: message,
               option: option,
               loading: loading));
+    }
+  }
+
+  Future<void> _sendMessageAccordingly(String actionType) async {
+    switch (actionType) {
+      case 'plasma':
+        List numberList =
+        dataFilteredList.map((data) => data["phone1"]).toList();
+        await _addAnswerFromChatbot(
+            message: 'Phone no. ${numberList.join('\n').toString()}', waitForSometime: true);
     }
   }
 }
