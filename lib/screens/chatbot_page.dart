@@ -6,9 +6,11 @@ import 'package:covibot/constants.dart' as constants;
 import 'package:covibot/screens/settings_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_autolink_text/flutter_autolink_text.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ChatbotPage extends StatefulWidget {
   @override
@@ -170,15 +172,25 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                                   ),
                                                 ),
                                               ),
-                                              secondChild: Text(
-                                                optionPresent
+                                              secondChild: AutolinkText(
+                                                onPhoneTap: (link) async {
+                                                  if (await canLaunch(link)) {
+                                                    await launch(link);
+                                                  } else {
+                                                    print('Could not launch $link');
+                                                  }
+                                                },
+                                                text: optionPresent
                                                     ? chatList[index]
                                                     .option
                                                     .queryForChatbot
                                                     : chatList[index].message,
-                                                style: Theme.of(context)
+                                                textStyle: Theme.of(context)
                                                     .textTheme
                                                     .bodyText1,
+                                                linkStyle: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyText1.copyWith(color: Colors.blue,),
                                               ),
                                             ),
                                           ),

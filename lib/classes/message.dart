@@ -5,12 +5,6 @@ enum Sender {
   user
 }
 
-Map<String, String> chatbotAction = {
-  'askDistrictForPlasma': 'askDistrictForPlasma',
-  'fetchPlasma': 'fetchPlasma',
-  'askStatePlasma': 'askStatePlasma',
-};
-
 class Message {
   final String message;
   final Sender sender;

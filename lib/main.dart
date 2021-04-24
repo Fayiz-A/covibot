@@ -5,7 +5,7 @@ import 'package:covibot/blocs/shared_preferences_bloc.dart';
 import 'package:covibot/constants.dart' as constants;
 import 'package:covibot/screens/chatbot_page.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'screens/settings_page.dart';
