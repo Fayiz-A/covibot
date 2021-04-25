@@ -7,6 +7,7 @@ import 'package:covibot/screens/settings_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -171,8 +172,19 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                                   ),
                                                 ),
                                               ),
-                                              secondChild: Text(
-                                                optionPresent
+                                              secondChild: Linkify(
+                                                onOpen: (link) async {
+                                                  try {
+                                                    if (await canLaunch(link.url)) {
+                                                      await launch(link.url);
+                                                    } else {
+                                                      print('Could not launch $link');
+                                                    }
+                                                  } catch(e) {
+                                                    print('Could not launch $link');
+                                                  }
+                                                },
+                                                text: optionPresent
                                                     ? chatList[index]
                                                     .option
                                                     .message
