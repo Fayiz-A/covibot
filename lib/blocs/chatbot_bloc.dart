@@ -134,7 +134,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
             if (dataFilteredList.length <= 0) {
               await _addAnswerFromChatbot(
                   message:
-                      'Sorry. We do not have data for this state right now',
+                      'StateNotAvailable'.tr(),
                   waitForSometime: true);
             } else {
               await _addAnswerFromChatbot(
@@ -154,7 +154,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
             if (dataFilteredList.length <= 0) {
               await _addAnswerFromChatbot(
                   message:
-                      'Sorry. We do not have data for this district right now',
+                      'DistrictNotAvailable'.tr(),
                   waitForSometime: true);
             } else {
               print(actionType);
@@ -243,7 +243,15 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
           (data) {
             _addAnswerFromChatbot(
               message:
-                  'City: ${data['city'] ?? ''} \nDistrict: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nDescription: ${data['description'] ?? ''} \nSource: ${data['sourceLink'] ?? ''} ',
+                'PlasmaData'.tr(namedArgs: {
+                  'city': data['city'] ?? '',
+                  'district': data['district'] ?? '',
+                  'state': data['state'] ?? '',
+                  'phoneNo': data['phone1'].toString() ?? '',
+                  'description': data['description'] ?? '',
+                  'sourceLink': data['sourceLink'] ?? ''
+                })
+                  // 'City: ${data['city'] ?? ''} \nDistrict: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nDescription: ${data['description'] ?? ''} \nSource: ${data['sourceLink'] ?? ''} ',
             );
           },
         );
@@ -253,7 +261,17 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
           (data) {
             _addAnswerFromChatbot(
               message:
-                  'City: ${data['city'] ?? ''} \nDistrict: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nVerification: ${data['comment'] ?? ''} \nSource: ${data['sourceLink'] ?? ''} ',
+                  'OxygenData'.tr(
+                    namedArgs: {
+                      'city': data['city'] ?? '',
+                      'district': data['district'] ?? '',
+                      'state': data['state'] ?? '',
+                      'phoneNo': data['phone1'].toString() ?? '',
+                      'comment': data['comment'] ?? '',
+                      'sourceLink': data['sourceLink'] ?? '',
+                    }
+                  ).toString()
+                  // 'City: ${data['city'] ?? ''} \nDistrict: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nVerification: ${data['comment'] ?? ''} \nSource: ${data['sourceLink'] ?? ''} ',
             );
           },
         );
@@ -263,7 +281,15 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
           (data) {
             _addAnswerFromChatbot(
               message:
-                  'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nDescription: ${data['description'] ?? ''} \nSource: ${data['source'] ?? ''} \nSource Url: ${data['sourceUrl'] ?? ''} ',
+                "HelplineNumberData".tr(namedArgs: {
+                  'district': data['district'] ?? '',
+                  'state': data['state'] ?? '',
+                  'phoneNo': data['phone1'].toString() ?? '',
+                  'description': data['description'] ?? '',
+                  'source': data['source'] ?? '',
+                  'sourceLink': data['sourceLink'] ?? '',
+                })
+                  // 'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nDescription: ${data['description'] ?? ''} \nSource: ${data['source'] ?? ''} \nSource Url: ${data['sourceUrl'] ?? ''} ',
             );
           },
         );
@@ -272,8 +298,12 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
         dataFilteredList.forEach(
           (data) {
             _addAnswerFromChatbot(
-              message:
-                  'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nComment: ${data['comment'] ?? ''} ',
+              message: 'AmbulanceData'.tr(namedArgs: {
+                'district': data['district'] ?? '',
+                'state': data['state'] ?? '',
+                'phoneNo': data['phone1'].toString() ?? '',
+                'comment': data['comment'] ?? '',
+              }),
             );
           },
         );
@@ -283,7 +313,17 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
             (data) {
               _addAnswerFromChatbot(
                 message:
-                    'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? data['phone2'] ?? ''} \nComment: ${data['comment'] ?? ''} \nLast verified on: ${data['lastVerifiedOn']} \nName: ${data['name']}',
+                  'HospitalsData'.tr(
+                    namedArgs: {
+                      'district': data['district'] ?? '',
+                      'state': data['state'] ?? '',
+                      'phoneNo': data['phone1'].toString() ?? data['phone2'].toString() ?? '',
+                      'comment': data['comment'] ?? '',
+                      'lastVerifiedOn': data['lastVerifiedOn'] != null ? data['lastVerifiedOn'].toString().substring(0, 10):'',
+                      'name': data['name'],
+                    }
+                  )
+                    // 'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? data['phone2'] ?? ''} \nComment: ${data['comment'] ?? ''} \nLast verified on: ${data['lastVerifiedOn']} \nName: ${data['name']}',
               );
             },
           );
@@ -292,8 +332,16 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
           dataFilteredList.forEach(
             (data) {
               _addAnswerFromChatbot(
-                message:
-                    'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nComment: ${data['comment'] ?? ''} \nLast verified on: ${data['lastVerifiedOn']} \nAddress: ${data['address']} \nName: ${data['name']}',
+                message: 'MedicineAvailabilityData'.tr(namedArgs: {
+                  'district': data['district'] ?? '',
+                  'state': data['state'] ?? '',
+                  'phoneNo': data['phone1'].toString() ?? '',
+                  'comment': data['comment'] ?? '',
+                  'lastVerifiedOn': data['lastVerifiedOn'] != null ? data['lastVerifiedOn'].toString().substring(0, 10):'',
+                  'address': data['address'] ?? '',
+                  'name': data['name'] ?? ''
+                })
+                    // 'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nComment: ${data['comment'] ?? ''} \nLast verified on: ${data['lastVerifiedOn']} \nAddress: ${data['address']} \nName: ${data['name']}',
               );
             },
           );
