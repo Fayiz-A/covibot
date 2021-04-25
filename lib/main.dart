@@ -18,6 +18,7 @@ Future<void> main() async {
       path: 'assets/lang',
       saveLocale: true,
       fallbackLocale: Locale('en', 'UK'),
+      startLocale: Locale('en', 'UK'),
       child: MyApp()));
 }
 
