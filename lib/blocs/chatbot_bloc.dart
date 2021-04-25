@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dialogflow/dialogflow_v2.dart';
 import 'package:http/http.dart' as http;
+import 'package:easy_localization/easy_localization.dart';
 
 abstract class ChatbotEvent {}
 
@@ -18,8 +19,8 @@ class SendQueryAndYieldMessageEvent extends ChatbotEvent {
 
   SendQueryAndYieldMessageEvent(
       {@required this.query,
-        this.action,
-        this.sendMessageToDialogFlow = false});
+      this.action,
+      this.sendMessageToDialogFlow = false});
 }
 
 class SendMessageFromChatbotEvent extends ChatbotEvent {
@@ -30,9 +31,9 @@ class SendMessageFromChatbotEvent extends ChatbotEvent {
 
   SendMessageFromChatbotEvent(
       {@required this.message,
-        this.option,
-        this.action,
-        this.sendMessageToDialogFlow = false});
+      this.option,
+      this.action,
+      this.sendMessageToDialogFlow = false});
 }
 
 //TODO: Refactor this to change chatbot locale and introduce parameters for accepting locale. Right now it is toggle as there are only two locales en-UK and hi-IN
@@ -80,7 +81,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
           List responseListMessages = aiResponse.getListMessage();
 
           String responseFromChatbot =
-          responseListMessages[0]["text"]["text"][0].toString();
+              responseListMessages[0]["text"]["text"][0].toString();
 
           String action = aiResponse.queryResult.action;
 
@@ -94,7 +95,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
                 .trim()
                 .toLowerCase();
             var httpResponse =
-            await http.get(responseListMessages[1]["payload"]["api"]);
+                await http.get(responseListMessages[1]["payload"]["api"]);
             apiResonse = jsonDecode(httpResponse.body);
 
             await _addAnswerFromChatbot(
@@ -123,21 +124,21 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
           if (event.action == 'askDistrict') {
             dataFilteredList = apiResonse["data"]
                 .where((data) => data["state"]
-                .toLowerCase()
-                .trim()
-                .contains(query.toLowerCase().trim())
-                ? true
-                : false)
+                        .toLowerCase()
+                        .trim()
+                        .contains(query.toLowerCase().trim())
+                    ? true
+                    : false)
                 .toList();
 
             if (dataFilteredList.length <= 0) {
               await _addAnswerFromChatbot(
                   message:
-                  'Sorry. We do not have data for this state right now',
+                      'Sorry. We do not have data for this state right now',
                   waitForSometime: true);
             } else {
               await _addAnswerFromChatbot(
-                  message: 'Please enter your district.',
+                  message: 'AskDistrict'.tr(),
                   action: 'fetchResult',
                   sendMessageToDialogflow: false,
                   waitForSometime: true);
@@ -145,15 +146,15 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
           } else if (event.action == 'fetchResult') {
             dataFilteredList = dataFilteredList
                 .where((data) => data["district"]
-                .toLowerCase()
-                .trim()
-                .contains(query.toLowerCase().trim()))
+                    .toLowerCase()
+                    .trim()
+                    .contains(query.toLowerCase().trim()))
                 .toList();
 
             if (dataFilteredList.length <= 0) {
               await _addAnswerFromChatbot(
                   message:
-                  'Sorry. We do not have data for this district right now',
+                      'Sorry. We do not have data for this district right now',
                   waitForSometime: true);
             } else {
               print(actionType);
@@ -194,17 +195,17 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
     }
 
     AuthGoogle authGoogle =
-    await AuthGoogle(fileJson: "assets/services.json").build();
+        await AuthGoogle(fileJson: "assets/services.json").build();
     dialogflow = Dialogflow(authGoogle: authGoogle, language: _language);
   }
 
   Future<void> _addAnswerFromChatbot(
       {Option option,
-        @required String message,
-        bool loading = false,
-        bool sendMessageToDialogflow = true,
-        String action,
-        bool waitForSometime = false}) async {
+      @required String message,
+      bool loading = false,
+      bool sendMessageToDialogflow = true,
+      String action,
+      bool waitForSometime = false}) async {
     if (waitForSometime)
       await Future.delayed(constants.messageDurationForCornerCaseMessages);
 
@@ -239,33 +240,63 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
     switch (actionType) {
       case 'plasma':
         dataFilteredList.forEach(
-              (data) {
+          (data) {
             _addAnswerFromChatbot(
               message:
-              'City: ${data['city'] ?? ''} \nDistrict: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nDescription: ${data['description'] ?? ''} \nSource: ${data['sourceLink'] ?? ''} ',
+                  'City: ${data['city'] ?? ''} \nDistrict: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nDescription: ${data['description'] ?? ''} \nSource: ${data['sourceLink'] ?? ''} ',
             );
           },
         );
         break;
       case 'oxygen':
         dataFilteredList.forEach(
-              (data) {
+          (data) {
             _addAnswerFromChatbot(
               message:
-              'City: ${data['city'] ?? ''} \nDistrict: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nVerification: ${data['comment'] ?? ''} \nSource: ${data['sourceLink'] ?? ''} ',
+                  'City: ${data['city'] ?? ''} \nDistrict: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nVerification: ${data['comment'] ?? ''} \nSource: ${data['sourceLink'] ?? ''} ',
             );
           },
         );
         break;
       case 'helplinenumber':
         dataFilteredList.forEach(
-              (data) {
+          (data) {
             _addAnswerFromChatbot(
               message:
-              'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nDescription: ${data['description'] ?? ''} \nSource: ${data['source'] ?? ''} \nSource Url: ${data['sourceUrl'] ?? ''} ',
+                  'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nDescription: ${data['description'] ?? ''} \nSource: ${data['source'] ?? ''} \nSource Url: ${data['sourceUrl'] ?? ''} ',
             );
           },
         );
+        break;
+      case 'ambulance':
+        dataFilteredList.forEach(
+          (data) {
+            _addAnswerFromChatbot(
+              message:
+                  'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nComment: ${data['comment'] ?? ''} ',
+            );
+          },
+        );
+        break;
+        case 'hospitalsandbeds':
+          dataFilteredList.forEach(
+            (data) {
+              _addAnswerFromChatbot(
+                message:
+                    'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? data['phone2'] ?? ''} \nComment: ${data['comment'] ?? ''} \nLast verified on: ${data['lastVerifiedOn']} \nName: ${data['name']}',
+              );
+            },
+          );
+        break;
+        case 'medicineavailability':
+          dataFilteredList.forEach(
+            (data) {
+              _addAnswerFromChatbot(
+                message:
+                    'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nComment: ${data['comment'] ?? ''} \nLast verified on: ${data['lastVerifiedOn']} \nAddress: ${data['address']} \nName: ${data['name']}',
+              );
+            },
+          );
         break;
       default:
         await _addAnswerFromChatbot(

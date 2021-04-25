@@ -176,7 +176,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                                 optionPresent
                                                     ? chatList[index]
                                                     .option
-                                                    .queryForChatbot
+                                                    .message
                                                     : chatList[index].message,
                                                 style: Theme.of(context)
                                                     .textTheme
