@@ -1,12 +1,20 @@
 {
-  "CoviBot": "Hindi",
-  "SettingsPageTitle": "Settings Page in Hindi",
-  "DarkTheme": "Dark Theme in Hindi",
-  "Language": "Language in hindi",
-  "FontSize": "Font Size in hindi",
-  "FontFamily": "FontFamily",
+  "CoviBot": "कोविबोट",
+  "SettingsPageTitle": "सेटिंग्स पेज",
+  "DarkTheme": "डार्क थीम",
+  "Language": "भाषा",
+  "FontSize": "फ़ॉन्ट साइज़",
+  "FontFamily": "फ़ॉन्ट फेमली",
 
-  "DefaultMessage": "Mai aapki madad kaise karon?",
-  "ErrorMessage": "Error message in hindi",
-  "NoInternetMessage" : "No internet message in hindi"
+  "DefaultMessage": "मैं आपकी सहायता कैसे कर सकता हूँ?",
+  "ErrorMessage": "उफ़! लगता है मेरे साथ कुछ गलत हो गया है। जैसे मनुष्य बीमार पड़ते हैं, वैसे ही मैं भी कभी-कभी बीमार पड़ जाता हूँ। प्रार्थना करें कि मैं जल्द स्वस्थ हो जाऊं।",
+  "NoInternetMessage" : "जब आप इंटरनेट से जुड़े होते हैं तो मैं अधिक बुद्धिमान होता हूं।",
+
+  "AskDistrict": "कृपया अपना जिला लिखें| (अंग्रेजी अक्षरों में)",
+  "Plasma": "प्लाज्मा",
+  "Oxygen": "ऑक्सीजन",
+  "HelplineNumber": "हेल्पलाइन नंबर",
+  "Ambulance": "एम्बुलेंस",
+  "Hospitals": "अस्पताल",
+  "MedicineAvailability": "दवा की उपलब्धता"
 }

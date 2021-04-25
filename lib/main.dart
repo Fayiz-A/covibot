@@ -1,14 +1,12 @@
 import 'package:covibot/blocs/chatbot_bloc.dart';
-import 'package:covibot/blocs/internet_connnection_bloc.dart';
 import 'package:covibot/blocs/settings_bloc.dart';
 import 'package:covibot/blocs/shared_preferences_bloc.dart';
+import 'package:covibot/classes/message.dart';
 import 'package:covibot/constants.dart' as constants;
 import 'package:covibot/screens/chatbot_page.dart';
 import 'package:easy_localization/easy_localization.dart';
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'screens/settings_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,16 +29,53 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (BuildContext context) => SharedPreferencesBloc()..add(InitializeEvent()),
+          create: (BuildContext context) =>
+          SharedPreferencesBloc()..add(InitializeEvent()),
         ),
         BlocProvider(
-          create: (BuildContext context) => ChatbotBloc()
-            ..add(ChangeChatbotLocale(locale))
-            ..add(SendMessageFromChatbotEvent(
-                message: constants.initialMessageFromChatbot.tr()))
+            create: (BuildContext context) => ChatbotBloc()
+              ..add(ChangeChatbotLocale(locale))
+              ..add(SendMessageFromChatbotEvent(
+                message: constants.initialMessageFromChatbot.tr(),
+              ))
+              ..add(SendMessageFromChatbotEvent(
+                  message: '',
+                  option: Option(
+                      message: 'Plasma'.tr(),
+                      queryForChatbot: 'plasma')))
+              ..add(SendMessageFromChatbotEvent(
+                  message: '',
+                  option: Option(
+                      message: 'Oxygen'.tr(),
+                      queryForChatbot: 'oxygen')))
+              ..add(SendMessageFromChatbotEvent(
+                  message: '',
+                  option: Option(
+                      message: 'HelplineNumber'.tr(),
+                      queryForChatbot: 'helpline number')))
+              ..add(SendMessageFromChatbotEvent(
+                  message: '',
+                  option: Option(
+                      message: 'Ambulance'.tr(),
+                      queryForChatbot: 'ambulance')))
+              ..add(SendMessageFromChatbotEvent(
+                  message: '',
+                  option: Option(
+                      message: 'Hospitals'.tr(),
+                      queryForChatbot: 'hospitals and beds')))
+              ..add(SendMessageFromChatbotEvent(
+                  message: '',
+                  option: Option(
+                      message: 'MedicineAvailability'.tr(),
+                      queryForChatbot: 'medicine availability')))
+
         ),
         BlocProvider(
-          create: (BuildContext context) => SettingsBloc()..add(SetInitialValuesEvent(themeMode: ThemeMode.dark, fontSize: 20.0, locale: Locale('en', 'UK'))),
+          create: (BuildContext context) => SettingsBloc()
+            ..add(SetInitialValuesEvent(
+                themeMode: ThemeMode.dark,
+                fontSize: 20.0,
+                locale: Locale('en', 'UK'))),
         ),
       ],
       child: BlocBuilder<SettingsBloc, SettingsState>(
@@ -63,7 +98,10 @@ class MyApp extends StatelessWidget {
                         .copyWith(fontSize: state.fontSize),
                   ),
                   tooltipTheme: TooltipThemeData(
-                    textStyle: Theme.of(context).textTheme.bodyText1.copyWith(color: Colors.white),
+                    textStyle: Theme.of(context)
+                        .textTheme
+                        .bodyText1
+                        .copyWith(color: Colors.white),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(20.0)),
                       color: Colors.black.withOpacity(0.7),
@@ -80,7 +118,7 @@ class MyApp extends StatelessWidget {
                         .copyWith(fontSize: state.fontSize),
                   ),
                   tooltipTheme: TooltipThemeData(
-                   textStyle: Theme.of(context).textTheme.bodyText1,
+                    textStyle: Theme.of(context).textTheme.bodyText1,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(20.0)),
                       color: Colors.white.withOpacity(0.9),

@@ -8,5 +8,13 @@
 
   "DefaultMessage": "Hi, how may I assist you?",
   "ErrorMessage": "Oops! Looks like something went wrong with me. Just like humans get ill, I also sometimes get ill. Pray that I get well soon.",
-  "NoInternetMessage" : "I am more intelligent when you are connected to the internet."
+  "NoInternetMessage" : "I am more intelligent when you are connected to the internet.",
+
+  "AskDistrict": "Please enter your district.",
+  "Plasma": "Plasma",
+  "Oxygen": "Oxygen",
+  "HelplineNumber": "Helpline Number",
+  "Ambulance": "Ambulance",
+  "Hospitals": "Hospitals",
+  "MedicineAvailability": "Medicine Availability"
 }
