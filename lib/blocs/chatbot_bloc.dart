@@ -87,7 +87,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
 
           print(action);
 
-          if (action.contains(constants.apiFetchKeyword) &&
+          if (action != null && action.contains(constants.apiFetchKeyword) &&
               responseListMessages.length == 2 &&
               responseListMessages[1]["payload"] != null) {
             actionType = action

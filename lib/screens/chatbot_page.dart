@@ -6,7 +6,6 @@ import 'package:covibot/constants.dart' as constants;
 import 'package:covibot/screens/settings_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_autolink_text/flutter_autolink_text.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:easy_localization/easy_localization.dart';
