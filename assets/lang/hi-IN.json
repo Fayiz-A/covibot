@@ -16,5 +16,15 @@
   "HelplineNumber": "हेल्पलाइन नंबर",
   "Ambulance": "एम्बुलेंस",
   "Hospitals": "अस्पताल",
-  "MedicineAvailability": "दवा की उपलब्धता"
+  "MedicineAvailability": "दवा की उपलब्धता",
+
+  "StateNotAvailable": "क्षमा करिए| अभी हमारे पास इस राज्य के लिए डेटा नहीं है|",
+  "DistrictNotAvailable": "क्षमा करिए| अभी हमारे पास इस जिले के लिए डेटा नहीं है|",
+
+  "PlasmaData": "City: {city} \nजिला: {district} \nराज्य: {state} \nफ़ोन नंबर: {phoneNo} \nसंदेश: {description} \nस्रोत: {sourceLink}",
+  "OxygenData": "City: {city} \nजिला: {district} \nराज्य: {state} \nफ़ोन नंबर: {phoneNo} \nसंदेश: {comment} \nस्रोत: {sourceLink}",
+  "AmbulanceData": "जिला: {district} \nराज्य: {state} \nफ़ोन नंबर: {phoneNo} \nसंदेश: {comment}",
+  "HelplineNumberData": "जिला: {district} \nराज्य: {state} \nफ़ोन नंबर: {phoneNo} \nसंदेश: {description} \nस्रोत: {source} \nस्रोत लिंक: {sourceLink}",
+  "HospitalsData": "जिला: {district} \nराज्य: {state} \nफ़ोन नंबर: {phoneNo} \nसंदेश: {comment} \nअंतिम बार जाँच: {lastVerifiedOn} \nनाम: {name}",
+  "MedicineAvailabilityData": "जिला: {district} \nराज्य: {state} \nफ़ोन नंबर: {phoneNo} \nसंदेश: {comment} \nअंतिम बार जाँच: {lastVerifiedOn} \nपता: {address} \nनाम: {name}"
 }
