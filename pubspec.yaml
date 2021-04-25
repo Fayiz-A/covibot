@@ -44,7 +44,7 @@ dependencies:
   shared_preferences: ^2.0.5
 
   #for making links clickable easily
-  flutter_autolink_text: ^1.0.0+1
+  flutter_linkify: ^5.0.2
 
   #for launching urls, phone no.s etc.
   url_launcher: ^6.0.3
