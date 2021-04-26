@@ -1,0 +1,30 @@
+{
+  "CoviBot": "CoviBot",
+  "SettingsPageTitle": "Settings Page",
+  "DarkTheme": "Dark Theme",
+  "Language": "Language",
+  "FontSize": "Font Size",
+  "FontFamily": "Font Family",
+
+  "DefaultMessage": "Hi, how may I assist you? You can choose one of the options listed below.",
+  "ErrorMessage": "Oops! Looks like something went wrong with me. Just like humans get ill, I also sometimes get ill. Pray that I get well soon.",
+  "NoInternetMessage" : "I am more intelligent when you are connected to the internet.",
+
+  "AskDistrict": "Please enter your district.",
+  "Plasma": "Plasma",
+  "Oxygen": "Oxygen",
+  "HelplineNumber": "Helpline Number",
+  "Ambulance": "Ambulance",
+  "Hospitals": "Hospitals",
+  "MedicineAvailability": "Medicine Availability",
+
+  "StateNotAvailable": "Sorry. We do not have data for this state right now",
+  "DistrictNotAvailable": "Sorry. We do not have data for this district right now",
+
+  "PlasmaData": "City: {city} \nDistrict: {district} \nState: {state} \nPhone no: {phoneNo} \nDescription: {description} \nSource: {sourceLink}",
+  "OxygenData": "City: {city} \nDistrict: {district} \nState: {state} \nPhone no: {phoneNo} \nVerification: {comment} \nSource: {sourceLink}",
+  "AmbulanceData": "District: {district} \nState: {state} \nPhone no: {phoneNo} \nComment: {comment}",
+  "HelplineNumberData": "District: {district} \nState: {state} \nPhone no: {phoneNo} \nDescription: {description} \nSource: {source} \nSource Url: {sourceLink}",
+  "HospitalsData": "District: {district} \nState: {state} \nPhone no: {phoneNo} \nComment: {comment} \nLast verified on: {lastVerifiedOn} \nName: {name}",
+  "MedicineAvailabilityData": "District: {district} \nState: {state} \nPhone no: {phoneNo} \nComment: {comment} \nLast verified on: {lastVerifiedOn} \nAddress: {address} \nName: {name}"
+}
