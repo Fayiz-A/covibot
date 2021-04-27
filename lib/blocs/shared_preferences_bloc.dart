@@ -42,7 +42,7 @@ class SharedPreferencesBloc extends Bloc<SharedPreferencesEvent, SharedPreferenc
     } else if (event is GetEvent) {
       var value = prefs.get(event.key);
 
-      yield ValueRetrievedState(value);
+      yield ValueRetrievedState(value, key: event.key);
     } else if(event is SaveEvent) {
       switch(event.type) {
         case TypeEnum.boolean:
@@ -76,7 +76,8 @@ class InitializedState extends SharedPreferencesState {}
 class ValueSavedState extends SharedPreferencesState {}
 
 class ValueRetrievedState extends SharedPreferencesState {
+  final String key;
   final value;
 
-  ValueRetrievedState(this.value);
+  ValueRetrievedState(this.value, {@required this.key});
 }

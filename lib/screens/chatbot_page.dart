@@ -22,13 +22,15 @@ class _ChatbotPageState extends State<ChatbotPage> {
   TextEditingController queryTextFormFieldController = TextEditingController();
 
   ChatbotBloc chatBloc;
+  SharedPreferencesBloc sharedPreferencesBloc;
+  bool _firstTime;
 
   @override
   void initState() {
     super.initState();
     chatBloc = BlocProvider.of<ChatbotBloc>(context);
 
-    SharedPreferencesBloc sharedPreferencesBloc =
+    sharedPreferencesBloc =
         BlocProvider.of<SharedPreferencesBloc>(context);
 
     SettingsBloc settingsBloc = BlocProvider.of<SettingsBloc>(context);
@@ -40,16 +42,24 @@ class _ChatbotPageState extends State<ChatbotPage> {
       if (state is InitializedState) {
         sharedPreferencesBloc.add(GetEvent('fontSize'));
         sharedPreferencesBloc.add(GetEvent('darkTheme'));
+        sharedPreferencesBloc.add(GetEvent('firstTime'));
       }
       if (state is ValueRetrievedState) {
         var value = state.value;
+        String key = state.key;
 
         if (value != null) {
-          if (value.runtimeType == double) {
+          if (key == 'fontSize') {
             _fontSize = value;
-          } else if (value.runtimeType == bool) {
+          } else if (key == 'darkTheme') {
             _themeMode = value == true ? ThemeMode.dark : ThemeMode.light;
+          } else if (key == 'firstTime') {
+            _firstTime = value;
+            if(_firstTime == true) {
+              showDisclaimerAlertAfterViewRenders();
+            }
           }
+
           if (_fontSize != null && _themeMode != null) {
             settingsBloc.add(SetInitialValuesEvent(
                 fontSize: _fontSize,
@@ -60,11 +70,45 @@ class _ChatbotPageState extends State<ChatbotPage> {
           _fontSize = constants.defaultFontSize;
           _themeMode = constants.defaultThemeMode;
 
+          if(_firstTime == null) {
+            _firstTime = true;
+            showDisclaimerAlertAfterViewRenders();
+          }
+
           settingsBloc.add(SetInitialValuesEvent(
               fontSize: _fontSize,
               locale: context.locale,
               themeMode: _themeMode));
         }
+      }
+    });
+
+  }
+
+  showDisclaimerAlertAfterViewRenders() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (_firstTime == true) {
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false, // user must tap button!
+          builder: (BuildContext context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              scrollable: true,
+              title: Text('Disclaimer'),
+              content: Text('This app provides data from liferesources.in apis. We shall not be responsible for any kind of losses due to the data provided by this app.', style: TextStyle(fontSize: 20),),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Yes, I Agree'),
+                  onPressed: () {
+                    sharedPreferencesBloc.add(SaveEvent(type: TypeEnum.boolean, value: false, key: 'firstTime'));
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
       }
     });
   }
@@ -84,12 +128,13 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
   _launchURL(link) async {
     print(link.url);
-    if(link != null) {
+    if (link != null) {
       try {
-          await launch(link.url);
+        await launch(link.url);
       } catch (e) {
         print(e);
-        chatBloc.add(SendMessageFromChatbotEvent(message: 'URLCannotLaunch'.tr()));
+        chatBloc
+            .add(SendMessageFromChatbotEvent(message: 'URLCannotLaunch'.tr()));
       }
     }
   }
@@ -152,11 +197,11 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                     child: InkWell(
                                       onTap: () => optionPresent
                                           ? clearTextBoxAndSendQuery(
-                                              query:
-                                                  message.option.queryForChatbot,
+                                              query: message
+                                                  .option.queryForChatbot,
                                               action: message.action,
-                                              sendMessageToDialogflow:
-                                                  message.sendMessageToDialogFlow)
+                                              sendMessageToDialogflow: message
+                                                  .sendMessageToDialogFlow)
                                           : null,
                                       child: Container(
                                         width: screenSize.width * 0.7,
@@ -204,7 +249,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                                         ? chatList[index]
                                                             .option
                                                             .message
-                                                        : chatList[index].message,
+                                                        : chatList[index]
+                                                            .message,
                                                     style: Theme.of(context)
                                                         .textTheme
                                                         .bodyText1,
@@ -215,14 +261,15 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                                     },
                                                     linkifiers: [
                                                       PhoneNumberLinkifier(),
-                                                      UrlLinkifier(),
+                                                      // UrlLinkifier(),
                                                       EmailLinkifier(),
                                                     ],
                                                     text: optionPresent
                                                         ? chatList[index]
                                                             .option
                                                             .message
-                                                        : chatList[index].message,
+                                                        : chatList[index]
+                                                            .message,
                                                     style: Theme.of(context)
                                                         .textTheme
                                                         .bodyText1,
