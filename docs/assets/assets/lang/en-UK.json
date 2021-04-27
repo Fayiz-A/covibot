@@ -9,6 +9,7 @@
   "DefaultMessage": "Hi, how may I assist you? You can choose one of the options listed below.",
   "ErrorMessage": "Oops! Looks like something went wrong with me. Just like humans get ill, I also sometimes get ill. Pray that I get well soon.",
   "NoInternetMessage" : "I am more intelligent when you are connected to the internet.",
+  "URLCannotLaunch": "Sorry. I couldn't launch the URL. But you can copy and paste it.",
 
   "AskDistrict": "Please enter your district.",
   "Plasma": "Plasma",
