@@ -241,114 +241,176 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
       case 'plasma':
         dataFilteredList.forEach(
           (data) {
-            _addAnswerFromChatbot(
-              message:
-                'PlasmaData'.tr(namedArgs: {
-                  'city': data['city'] ?? '',
-                  'district': data['district'] ?? '',
-                  'state': data['state'] ?? '',
-                  'phoneNo': data['phone1'].toString() ?? '',
-                  'description': data['description'] ?? '',
-                  'sourceLink': data['sourceLink'] ?? ''
-                })
-                  // 'City: ${data['city'] ?? ''} \nDistrict: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nDescription: ${data['description'] ?? ''} \nSource: ${data['sourceLink'] ?? ''} ',
-            );
+            _addFieldIfNotEmpty(data, {
+              'City'.tr(): 'city',
+              'District'.tr(): 'district',
+              'State'.tr(): 'state',
+              'PhoneNo'.tr(): 'phone1',
+              'Description'.tr(): 'description',
+              'SourceLink'.tr(): 'sourceLink'
+            });
+            // _addAnswerFromChatbot(
+            //   message:
+            //     'PlasmaData'.tr(namedArgs: {
+            //       'city': data['city'] ?? '',
+            //       'district': data['district'] ?? '',
+            //       'state': data['state'] ?? '',
+            //       'phoneNo': data['phone1'].toString() ?? '',
+            //       'description': data['description'] ?? '',
+            //       'sourceLink': data['sourceLink'] ?? ''
+            //     })
+            //       // 'City: ${data['city'] ?? ''} \nDistrict: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nDescription: ${data['description'] ?? ''} \nSource: ${data['sourceLink'] ?? ''} ',
+            // );
           },
         );
         break;
       case 'oxygen':
         dataFilteredList.forEach(
           (data) {
-            _addAnswerFromChatbot(
-              message:
-                  'OxygenData'.tr(
-                    namedArgs: {
-                      'city': data['city'] ?? '',
-                      'district': data['district'] ?? '',
-                      'state': data['state'] ?? '',
-                      'phoneNo': data['phone1'].toString() ?? '',
-                      'comment': data['comment'] ?? '',
-                      'sourceLink': data['sourceLink'] ?? '',
-                    }
-                  ).toString()
-                  // 'City: ${data['city'] ?? ''} \nDistrict: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nVerification: ${data['comment'] ?? ''} \nSource: ${data['sourceLink'] ?? ''} ',
-            );
+            _addFieldIfNotEmpty(data, {
+              'City'.tr(): 'city',
+              'District'.tr(): 'district',
+              'State'.tr(): 'state',
+              'PhoneNo'.tr(): 'phone1',
+              'Verification'.tr(): 'comment',
+              'SourceLink'.tr(): 'sourceLink'
+            });
+
+            // _addAnswerFromChatbot(
+            //   message:
+            //       'OxygenData'.tr(
+            //         namedArgs: {
+            //           'city': data['city'] ?? '',
+            //           'district': data['district'] ?? '',
+            //           'state': data['state'] ?? '',
+            //           'phoneNo': data['phone1'].toString() ?? '',
+            //           'comment': data['comment'] ?? '',
+            //           'sourceLink': data['sourceLink'] ?? '',
+            //         }
+            //       ).toString()
+            //       // 'City: ${data['city'] ?? ''} \nDistrict: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nVerification: ${data['comment'] ?? ''} \nSource: ${data['sourceLink'] ?? ''} ',
+            // );
           },
         );
         break;
       case 'helplinenumber':
         dataFilteredList.forEach(
           (data) {
-            _addAnswerFromChatbot(
-              message:
-                "HelplineNumberData".tr(namedArgs: {
-                  'district': data['district'] ?? '',
-                  'state': data['state'] ?? '',
-                  'phoneNo': data['phone1'].toString() ?? '',
-                  'description': data['description'] ?? '',
-                  'source': data['source'] ?? '',
-                  'sourceLink': data['sourceLink'] ?? '',
-                })
-                  // 'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nDescription: ${data['description'] ?? ''} \nSource: ${data['source'] ?? ''} \nSource Url: ${data['sourceUrl'] ?? ''} ',
-            );
+            _addFieldIfNotEmpty(data, {
+              'District'.tr(): 'district',
+              'State'.tr(): 'state',
+              'PhoneNo'.tr(): 'phone1',
+              'Description'.tr(): 'description',
+              'Source'.tr(): 'source',
+              'SourceLink'.tr(): 'sourceLink'
+            });
+            // _addAnswerFromChatbot(
+            //   message:
+            //     "HelplineNumberData".tr(namedArgs: {
+            //       'district': data['district'] ?? '',
+            //       'state': data['state'] ?? '',
+            //       'phoneNo': data['phone1'].toString() ?? '',
+            //       'description': data['description'] ?? '',
+            //       'source': data['source'] ?? '',
+            //       'sourceLink': data['sourceLink'] ?? '',
+            //     })
+            //       // 'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nDescription: ${data['description'] ?? ''} \nSource: ${data['source'] ?? ''} \nSource Url: ${data['sourceUrl'] ?? ''} ',
+            // );
           },
         );
         break;
       case 'ambulance':
         dataFilteredList.forEach(
           (data) {
-            _addAnswerFromChatbot(
-              message: 'AmbulanceData'.tr(namedArgs: {
-                'district': data['district'] ?? '',
-                'state': data['state'] ?? '',
-                'phoneNo': data['phone1'].toString() ?? '',
-                'comment': data['comment'] ?? '',
-              }),
-            );
+            _addFieldIfNotEmpty(data, {
+              'District'.tr(): 'district',
+              'State'.tr(): 'state',
+              'PhoneNo'.tr(): 'phone1',
+              'Comment'.tr(): 'comment',
+            });
+            // _addAnswerFromChatbot(
+            //   message: 'AmbulanceData'.tr(namedArgs: {
+            //     'district': data['district'] ?? '',
+            //     'state': data['state'] ?? '',
+            //     'phoneNo': data['phone1'].toString() ?? '',
+            //     'comment': data['comment'] ?? '',
+            //   }),
+            // );
           },
         );
         break;
         case 'hospitalsandbeds':
           dataFilteredList.forEach(
             (data) {
-              _addAnswerFromChatbot(
-                message:
-                  'HospitalsData'.tr(
-                    namedArgs: {
-                      'district': data['district'] ?? '',
-                      'state': data['state'] ?? '',
-                      'phoneNo': data['phone1'].toString() ?? data['phone2'].toString() ?? '',
-                      'comment': data['comment'] ?? '',
-                      'lastVerifiedOn': data['lastVerifiedOn'] != null ? data['lastVerifiedOn'].toString().substring(0, 10):'',
-                      'name': data['name'],
-                    }
-                  )
-                    // 'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? data['phone2'] ?? ''} \nComment: ${data['comment'] ?? ''} \nLast verified on: ${data['lastVerifiedOn']} \nName: ${data['name']}',
-              );
+              _addFieldIfNotEmpty(data, {
+                'District'.tr(): 'district',
+                'State'.tr(): 'state',
+                'PhoneNo'.tr(): 'phone1',
+                'Comment'.tr(): 'comment',
+                'LastVerifiedOn'.tr(): 'lastVerifiedOn',
+                'Name'.tr(): 'name'
+              });
+              // _addAnswerFromChatbot(
+              //   message:
+              //     'HospitalsData'.tr(
+              //       namedArgs: {
+              //         'district': data['district'] ?? '',
+              //         'state': data['state'] ?? '',
+              //         'phoneNo': data['phone1'].toString() ?? data['phone2'].toString() ?? '',
+              //         'comment': data['comment'] ?? '',
+              //         'lastVerifiedOn': data['lastVerifiedOn'] != null ? data['lastVerifiedOn'].toString().substring(0, 10):'',
+              //         'name': data['name'],
+              //       }
+              //     )
+              //       // 'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? data['phone2'] ?? ''} \nComment: ${data['comment'] ?? ''} \nLast verified on: ${data['lastVerifiedOn']} \nName: ${data['name']}',
+              // );
             },
           );
         break;
         case 'medicineavailability':
           dataFilteredList.forEach(
             (data) {
-              _addAnswerFromChatbot(
-                message: 'MedicineAvailabilityData'.tr(namedArgs: {
-                  'district': data['district'] ?? '',
-                  'state': data['state'] ?? '',
-                  'phoneNo': data['phone1'].toString() ?? '',
-                  'comment': data['comment'] ?? '',
-                  'lastVerifiedOn': data['lastVerifiedOn'] != null ? data['lastVerifiedOn'].toString().substring(0, 10):'',
-                  'address': data['address'] ?? '',
-                  'name': data['name'] ?? ''
-                })
-                    // 'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nComment: ${data['comment'] ?? ''} \nLast verified on: ${data['lastVerifiedOn']} \nAddress: ${data['address']} \nName: ${data['name']}',
-              );
+              _addFieldIfNotEmpty(data, {
+                'District'.tr(): 'district',
+                'State'.tr(): 'state',
+                'PhoneNo'.tr(): 'phone1',
+                'Comment'.tr(): 'comment',
+                'LastVerifiedOn'.tr(): 'lastVerifiedOn',
+                'Address'.tr(): 'address',
+                'Name'.tr(): 'name'
+              });
+              // _addAnswerFromChatbot(
+              //   message: 'MedicineAvailabilityData'.tr(namedArgs: {
+              //     'district': data['district'] ?? '',
+              //     'state': data['state'] ?? '',
+              //     'phoneNo': data['phone1'].toString() ?? '',
+              //     'comment': data['comment'] ?? '',
+              //     'lastVerifiedOn': data['lastVerifiedOn'] != null ? data['lastVerifiedOn'].toString().substring(0, 10):'',
+              //     'address': data['address'] ?? '',
+              //     'name': data['name'] ?? ''
+              //   })
+              //       // 'District: ${data['district'] ?? ''} \nState: ${data['state'] ?? ''} \nPhone no: ${data['phone1'] ?? ''} \nComment: ${data['comment'] ?? ''} \nLast verified on: ${data['lastVerifiedOn']} \nAddress: ${data['address']} \nName: ${data['name']}',
+              // );
             },
           );
         break;
       default:
         await _addAnswerFromChatbot(
             message: constants.errorMessage, waitForSometime: true);
+    }
+  }
+
+  Future<void> _addFieldIfNotEmpty(Map data, Map<String, String> keyFieldNameMap) async {
+    StringBuffer message = StringBuffer();
+
+    keyFieldNameMap.forEach((key, value) {
+      if(data[value] != null) {
+        message.writeln('$key: ${data[value]}');
+      }
+    });
+
+    if(message.isNotEmpty) {
+      _addAnswerFromChatbot(message: message.toString());
     }
   }
 }
