@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:covibot/blocs/chatbot_bloc.dart';
+import 'package:covibot/blocs/firebase_bloc.dart';
 import 'package:covibot/blocs/settings_bloc.dart';
 import 'package:covibot/blocs/shared_preferences_bloc.dart';
 import 'package:covibot/classes/message.dart';
@@ -7,6 +9,7 @@ import 'package:covibot/library_extensions/phone_number_url.dart';
 import 'package:covibot/screens/settings_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
@@ -81,6 +84,11 @@ class _ChatbotPageState extends State<ChatbotPage> {
         }
       }
     });
+
+    if(kIsWeb && !kDebugMode) {
+    FirebaseBloc firebaseBloc = BlocProvider.of<FirebaseBloc>(context)
+    ..add(FirebaseUpdateFieldEvent(collection: 'users', document: 'general', updateMap: {'visitorCount': FieldValue.increment(1)}));
+    }
   }
 
   showDisclaimerAlertAfterViewRenders() {
@@ -246,7 +254,7 @@ class ChatMessage extends StatefulWidget {
   final Message message;
   final int index;
 
-  ChatMessage({@required this.message, @required this.index});
+  const ChatMessage({@required this.message, @required this.index});
 
   @override
   _ChatMessageState createState() => _ChatMessageState();
@@ -292,7 +300,7 @@ class _ChatMessageState extends State<ChatMessage> {
                   widget.message.sendMessageToDialogFlow))
                   : null,
               child: Container(
-                width: screenSize.width * 0.7,
+                width: screenSize.width > constants.bigWindowSize ? screenSize.width * 0.4:screenSize.width * 0.7,
                 color: widget.message.sender == Sender.chatbot
                     ? optionPresent
                     ? Colors.red

@@ -1,10 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:covibot/blocs/chatbot_bloc.dart';
+import 'package:covibot/blocs/firebase_bloc.dart';
 import 'package:covibot/blocs/settings_bloc.dart';
 import 'package:covibot/blocs/shared_preferences_bloc.dart';
 import 'package:covibot/classes/message.dart';
 import 'package:covibot/constants.dart' as constants;
 import 'package:covibot/screens/chatbot_page.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,16 +16,29 @@ Future<void> main() async {
 
   await EasyLocalization.ensureInitialized();
 
+  bool firebaseInitialized;
+  try {
+    await Firebase.initializeApp();
+    firebaseInitialized = true;
+  } catch(e) {
+    firebaseInitialized = false;
+    print(e);
+  }
+
   runApp(EasyLocalization(
       supportedLocales: [Locale('en', 'UK'), Locale('hi', 'IN')],
       path: 'assets/lang',
       saveLocale: true,
       fallbackLocale: Locale('en', 'UK'),
       startLocale: Locale('en', 'UK'),
-      child: MyApp()));
+      child: MyApp(firebaseInitialized: firebaseInitialized)));
 }
 
 class MyApp extends StatelessWidget {
+
+  final bool firebaseInitialized;
+  MyApp({@required this.firebaseInitialized});
+
   @override
   Widget build(BuildContext context) {
     Locale locale = context.locale;
@@ -78,6 +94,8 @@ class MyApp extends StatelessWidget {
                 fontSize: 20.0,
                 locale: Locale('en', 'UK'))),
         ),
+        BlocProvider(lazy: false,create: (BuildContext context) => FirebaseBloc()
+          ..add(FirebaseInitializeEvent(initialized: firebaseInitialized)))
       ],
       child: BlocBuilder<SettingsBloc, SettingsState>(
           builder: (BuildContext context, SettingsState state) {

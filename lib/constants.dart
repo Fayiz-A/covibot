@@ -14,3 +14,5 @@ const ThemeMode defaultThemeMode = ThemeMode.dark;
 const double defaultFontSize = 20.0;
 
 String apiFetchKeyword = 'askDistrict';
+
+const bigWindowSize = 800;
