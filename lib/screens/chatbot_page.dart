@@ -131,22 +131,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
         sendMessageToDialogFlow: sendMessageToDialogflow));
   }
 
-  _launchURL(link) async {
-    print(link.url);
-    if (link != null) {
-      try {
-        await launch(link.url);
-      } catch (e) {
-        print(e);
-        chatBloc
-            .add(SendMessageFromChatbotEvent(message: 'URLCannotLaunch'.tr()));
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
     Message _message;
 
     return Scaffold(
@@ -175,10 +161,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                         itemCount: chatList.length,
                         itemBuilder: (BuildContext context, int index) {
                           Message message = chatList[index];
-
                           bool chatbotSender = message.sender == Sender.chatbot;
-
-                          bool optionPresent = message.option != null;
 
                       return Padding(
                         padding: const EdgeInsets.all(8.0),

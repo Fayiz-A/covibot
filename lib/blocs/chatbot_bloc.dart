@@ -247,8 +247,14 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
               'State'.tr(): 'state',
               'PhoneNo'.tr(): 'phone1',
               'Description'.tr(): 'description',
-              'SourceLink'.tr(): 'sourceLink'
-            });
+              'SourceLink'.tr(): 'sourceLink',
+              'Name'.tr(): 'name',
+              'Comment'.tr(): 'comment',
+              'LastVerifiedOn'.tr(): 'LastVerifiedOn'
+            },
+                substringFieldName: 'lastVerifiedOn',
+                substringEndIndex: 10
+            );
           },
         );
         break;
@@ -260,9 +266,17 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
               'District'.tr(): 'district',
               'State'.tr(): 'state',
               'PhoneNo'.tr(): 'phone1',
-              'Verification'.tr(): 'comment',
-              'SourceLink'.tr(): 'sourceLink'
-            });
+              'PhoneNo2'.tr(): 'phone2',
+              'EmailId'.tr(): 'emailId',
+              'Comment'.tr(): 'comment',
+              'SourceLink'.tr(): 'sourceLink',
+              'Description'.tr(): 'description',
+              'LastVerifiedOn'.tr(): 'lastVerifiedOn',
+              'Type'.tr(): 'type',
+            },
+                substringFieldName: 'lastVerifiedOn',
+                substringEndIndex: 10
+            );
           },
         );
         break;
