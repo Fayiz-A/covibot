@@ -30,8 +30,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
     super.initState();
     chatBloc = BlocProvider.of<ChatbotBloc>(context);
 
-    sharedPreferencesBloc =
-        BlocProvider.of<SharedPreferencesBloc>(context);
+    sharedPreferencesBloc = BlocProvider.of<SharedPreferencesBloc>(context);
 
     SettingsBloc settingsBloc = BlocProvider.of<SettingsBloc>(context);
 
@@ -55,7 +54,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
             _themeMode = value == true ? ThemeMode.dark : ThemeMode.light;
           } else if (key == 'firstTime') {
             _firstTime = value;
-            if(_firstTime == true) {
+            if (_firstTime == true) {
               showDisclaimerAlertAfterViewRenders();
             }
           }
@@ -70,7 +69,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
           _fontSize = constants.defaultFontSize;
           _themeMode = constants.defaultThemeMode;
 
-          if(_firstTime == null) {
+          if (_firstTime == null) {
             _firstTime = true;
             showDisclaimerAlertAfterViewRenders();
           }
@@ -82,7 +81,6 @@ class _ChatbotPageState extends State<ChatbotPage> {
         }
       }
     });
-
   }
 
   showDisclaimerAlertAfterViewRenders() {
@@ -93,15 +91,22 @@ class _ChatbotPageState extends State<ChatbotPage> {
           barrierDismissible: false, // user must tap button!
           builder: (BuildContext context) {
             return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
               scrollable: true,
               title: Text('Disclaimer'),
-              content: Text('This app provides data from liferesources.in apis. We shall not be responsible for any kind of losses due to the data provided by this app.', style: TextStyle(fontSize: 20),),
+              content: Text(
+                'This app provides data from liferesources.in apis. We shall not be responsible for any kind of losses due to the data provided by this app. \n\nThe data provided by this app for now is only related to India.',
+                style: TextStyle(fontSize: 20),
+              ),
               actions: <Widget>[
                 TextButton(
                   child: Text('Yes, I Agree'),
                   onPressed: () {
-                    sharedPreferencesBloc.add(SaveEvent(type: TypeEnum.boolean, value: false, key: 'firstTime'));
+                    sharedPreferencesBloc.add(SaveEvent(
+                        type: TypeEnum.boolean,
+                        value: false,
+                        key: 'firstTime'));
                     Navigator.of(context).pop();
                   },
                 ),
@@ -115,8 +120,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
   clearTextBoxAndSendQuery(
       {@required String query,
-      String action,
-      bool sendMessageToDialogflow = true}) {
+        String action,
+        bool sendMessageToDialogflow = true}) {
     queryTextFormFieldController.clear();
 
     print('sending permision: $sendMessageToDialogflow');
@@ -161,19 +166,19 @@ class _ChatbotPageState extends State<ChatbotPage> {
           Flexible(
             child: BlocBuilder<ChatbotBloc, ChatbotState>(
                 builder: (BuildContext context, ChatbotState state) {
-              if (state is MessageAddedState) {
-                List<Message> chatList = state.chatList;
-                _message = chatList[0];
+                  if (state is MessageAddedState) {
+                    List<Message> chatList = state.chatList;
+                    _message = chatList[0];
 
-                return ListView.builder(
-                    reverse: true,
-                    itemCount: chatList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      Message message = chatList[index];
+                    return ListView.builder(
+                        reverse: true,
+                        itemCount: chatList.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          Message message = chatList[index];
 
-                      bool chatbotSender = message.sender == Sender.chatbot;
+                          bool chatbotSender = message.sender == Sender.chatbot;
 
-                      bool optionPresent = message.option != null;
+                          bool optionPresent = message.option != null;
 
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -188,98 +193,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                   : Icon(Icons.person),
                               backgroundColor: Colors.black,
                             ),
-                            Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                child: ClipRRect(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(20.0)),
-                                  child: Material(
-                                    child: InkWell(
-                                      onTap: () => optionPresent
-                                          ? clearTextBoxAndSendQuery(
-                                              query: message
-                                                  .option.queryForChatbot,
-                                              action: message.action,
-                                              sendMessageToDialogflow: message
-                                                  .sendMessageToDialogFlow)
-                                          : null,
-                                      child: Container(
-                                        width: screenSize.width * 0.7,
-                                        color: chatbotSender
-                                            ? optionPresent
-                                                ? Colors.red
-                                                : Colors.orangeAccent
-                                            : Colors.greenAccent,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: AnimatedCrossFade(
-                                            crossFadeState: message.loading
-                                                ? CrossFadeState.showFirst
-                                                : CrossFadeState.showSecond,
-                                            duration: index == 0 &&
-                                                    message.sender ==
-                                                        Sender.chatbot
-                                                ? constants
-                                                    .fadeDurationBetweenProgressIndicatorAndMessage
-                                                : Duration(microseconds: 1),
-                                            firstChild: Align(
-                                              alignment: Alignment.centerLeft,
-                                              child: SizedBox(
-                                                // TODO: Remove this hardcoded value
-                                                width: 40,
-                                                height: 40,
-                                                child: SpinKitThreeBounce(
-                                                  //TODO: Remove this hardcoded value
-                                                  size: 20,
-                                                  color: Colors.black,
-                                                ),
-                                              ),
-                                            ),
-                                            secondChild: optionPresent
-                                                ? Linkify(
-                                                    onOpen: (link) async {
-                                                      await _launchURL(link);
-                                                    },
-                                                    linkifiers: [
-                                                      PhoneNumberLinkifier(),
-                                                      // UrlLinkifier(),
-                                                      EmailLinkifier(),
-                                                    ],
-                                                    text: optionPresent
-                                                        ? chatList[index]
-                                                            .option
-                                                            .message
-                                                        : chatList[index]
-                                                            .message,
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .bodyText1,
-                                                  )
-                                                : SelectableLinkify(
-                                                    onOpen: (link) async {
-                                                      await _launchURL(link);
-                                                    },
-                                                    linkifiers: [
-                                                      PhoneNumberLinkifier(),
-                                                      // UrlLinkifier(),
-                                                      EmailLinkifier(),
-                                                    ],
-                                                    text: optionPresent
-                                                        ? chatList[index]
-                                                            .option
-                                                            .message
-                                                        : chatList[index]
-                                                            .message,
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .bodyText1,
-                                                  ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                )),
+                            ChatMessage(message: message, index: index),
                           ],
                         ),
                       );
@@ -304,7 +218,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                               query: query,
                               action: _message.action,
                               sendMessageToDialogflow:
-                                  _message.sendMessageToDialogFlow),
+                              _message.sendMessageToDialogFlow),
                       //query from text controller will also work fine
                       style: Theme.of(context).textTheme.bodyText1,
                       autocorrect: false,
@@ -316,7 +230,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                   color: Colors.red,
                                   style: BorderStyle.solid),
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(20.0)))),
+                              BorderRadius.all(Radius.circular(20.0)))),
                       controller: queryTextFormFieldController,
                     ),
                   ),
@@ -325,22 +239,140 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   padding: EdgeInsets.all(4.0),
                   child: ClipOval(
                       child: Tooltip(
-                    message: 'Send',
-                    preferBelow: false,
-                    child: IconButton(
-                      icon: Icon(Icons.send),
-                      iconSize: 30.0,
-                      onPressed: () => clearTextBoxAndSendQuery(
-                          query: queryTextFormFieldController.text,
-                          action: _message.action,
-                          sendMessageToDialogflow:
+                        message: 'Send',
+                        preferBelow: false,
+                        child: IconButton(
+                          icon: Icon(Icons.send),
+                          iconSize: 30.0,
+                          onPressed: () => clearTextBoxAndSendQuery(
+                              query: queryTextFormFieldController.text,
+                              action: _message.action,
+                              sendMessageToDialogflow:
                               _message.sendMessageToDialogFlow),
-                    ),
-                  )),
+                        ),
+                      )),
                 )),
           ),
         ],
       ),
     );
+  }
+}
+
+class ChatMessage extends StatefulWidget {
+  final Message message;
+  final int index;
+
+  ChatMessage({@required this.message, @required this.index});
+
+  @override
+  _ChatMessageState createState() => _ChatMessageState();
+}
+
+class _ChatMessageState extends State<ChatMessage> {
+  ChatbotBloc chatbotBloc;
+
+  void initState() {
+    super.initState();
+    chatbotBloc = BlocProvider.of<ChatbotBloc>(context);
+  }
+
+  _launchURL(link) async {
+    print(link.url);
+    if (link != null) {
+      try {
+        await launch(link.url);
+      } catch (e) {
+        print(e);
+        chatbotBloc
+            .add(SendMessageFromChatbotEvent(message: 'URLCannotLaunch'.tr()));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    bool optionPresent = widget.message.option != null;
+    Size screenSize = MediaQuery.of(context).size;
+
+    return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8.0),
+        child: ClipRRect(
+          borderRadius: BorderRadius.all(Radius.circular(20.0)),
+          child: Material(
+            child: InkWell(
+              onTap: () => optionPresent
+                  ? chatbotBloc.add(SendQueryAndYieldMessageEvent(
+                  query: widget.message.option.queryForChatbot,
+                  action: widget.message.action,
+                  sendMessageToDialogFlow:
+                  widget.message.sendMessageToDialogFlow))
+                  : null,
+              child: Container(
+                width: screenSize.width * 0.7,
+                color: widget.message.sender == Sender.chatbot
+                    ? optionPresent
+                    ? Colors.red
+                    : Colors.orangeAccent
+                    : Colors.greenAccent,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: AnimatedCrossFade(
+                    crossFadeState: widget.message.loading
+                        ? CrossFadeState.showFirst
+                        : CrossFadeState.showSecond,
+                    duration: widget.index == 0 &&
+                        widget.message.sender == Sender.chatbot
+                        ? constants
+                        .fadeDurationBetweenProgressIndicatorAndMessage
+                        : Duration(microseconds: 1),
+                    firstChild: Align(
+                      alignment: Alignment.centerLeft,
+                      child: SizedBox(
+                        // TODO: Remove this hardcoded value
+                        width: 40,
+                        height: 40,
+                        child: SpinKitThreeBounce(
+                          //TODO: Remove this hardcoded value
+                          size: 20,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    secondChild: optionPresent
+                        ? Linkify(
+                      onOpen: (link) async {
+                        await _launchURL(link);
+                      },
+                      linkifiers: [
+                        UrlLinkifier(),
+                        PhoneNumberLinkifier(),
+                        EmailLinkifier(),
+                      ],
+                      text: optionPresent
+                          ? widget.message.option.message
+                          : widget.message.message,
+                      style: Theme.of(context).textTheme.bodyText1,
+                    )
+                        : SelectableLinkify(
+                      onOpen: (link) async {
+                        await _launchURL(link);
+                      },
+                      linkifiers: [
+                        UrlLinkifier(),
+                        PhoneNumberLinkifier(),
+                        EmailLinkifier(),
+                      ],
+                      text: optionPresent
+                          ? widget.message.option.message
+                          : widget.message.message,
+                      style: Theme.of(context).textTheme.bodyText1,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ));
   }
 }
