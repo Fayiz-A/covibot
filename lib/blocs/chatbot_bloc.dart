@@ -4,9 +4,11 @@ import 'dart:io';
 import 'package:covibot/classes/general_functions/language.dart';
 import 'package:covibot/classes/message.dart';
 import 'package:covibot/constants.dart' as constants;
+import 'package:covibot/getX/controllers/suggestions_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dialogflow/dialogflow_v2.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:http/http.dart' as http;
 import 'package:easy_localization/easy_localization.dart';
 
@@ -102,6 +104,11 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
                 message: responseFromChatbot,
                 action: 'askDistrict',
                 sendMessageToDialogflow: false);
+
+            Get.find<SuggestionsController>()
+              ..sendUserQuery.value = true
+              ..suggestionType.value = SuggestionType.state;
+
           } else {
             await _addAnswerFromChatbot(message: responseFromChatbot);
           }

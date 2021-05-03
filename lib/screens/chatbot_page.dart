@@ -5,6 +5,7 @@ import 'package:covibot/blocs/settings_bloc.dart';
 import 'package:covibot/blocs/shared_preferences_bloc.dart';
 import 'package:covibot/classes/message.dart';
 import 'package:covibot/constants.dart' as constants;
+import 'package:covibot/getX/controllers/suggestions_controller.dart';
 import 'package:covibot/library_extensions/phone_number_url.dart';
 import 'package:covibot/screens/settings_page.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -14,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:url_launcher/url_launcher.dart';
 
 class ChatbotPage extends StatefulWidget {
@@ -23,6 +25,7 @@ class ChatbotPage extends StatefulWidget {
 
 class _ChatbotPageState extends State<ChatbotPage> {
   TextEditingController queryTextFormFieldController = TextEditingController();
+  ScrollController _draggableScrollbarController = ScrollController(keepScrollOffset: true);
 
   ChatbotBloc chatBloc;
   SharedPreferencesBloc sharedPreferencesBloc;
@@ -89,6 +92,34 @@ class _ChatbotPageState extends State<ChatbotPage> {
     FirebaseBloc firebaseBloc = BlocProvider.of<FirebaseBloc>(context)
     ..add(FirebaseUpdateFieldEvent(collection: 'users', document: 'general', updateMap: {'visitorCount': FieldValue.increment(1)}));
     }
+
+    SuggestionsController suggestionsController = Get.find<SuggestionsController>();
+
+    OverlayEntry previousOverlay;
+
+    suggestionsController.suggestions.stream.listen((suggestions) {
+      OverlayEntry overlayEntry = OverlayEntry(
+          builder: (BuildContext context) {
+            return Center(
+              child: ListView.builder(
+                itemCount: suggestions.length,
+                  itemBuilder: (context, index) =>
+                      Text(suggestions[index].message, style: Theme.of(context).textTheme.bodyText1,)
+              ),
+            );
+          }
+      );
+
+      if(suggestions != null && suggestions.isNotEmpty) {
+        if(previousOverlay != null) previousOverlay.remove();
+        Overlay.of(context).insert(overlayEntry);
+        previousOverlay = overlayEntry;
+      } else {
+        if(previousOverlay != null) previousOverlay.remove();
+        previousOverlay = null;
+      }
+    });
+
   }
 
   showDisclaimerAlertAfterViewRenders() {
@@ -139,6 +170,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
         sendMessageToDialogFlow: sendMessageToDialogflow));
   }
 
+  SuggestionsController suggestionsController = Get.put(SuggestionsController());
+
   @override
   Widget build(BuildContext context) {
     Message _message;
@@ -166,6 +199,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
                     return ListView.builder(
                         reverse: true,
+                        controller: _draggableScrollbarController,
                         itemCount: chatList.length,
                         itemBuilder: (BuildContext context, int index) {
                           Message message = chatList[index];
@@ -212,6 +246,11 @@ class _ChatbotPageState extends State<ChatbotPage> {
                               _message.sendMessageToDialogFlow),
                       //query from text controller will also work fine
                       style: Theme.of(context).textTheme.bodyText1,
+                      onChanged: (String value) {
+                        if(suggestionsController.sendUserQuery.value) {
+                          suggestionsController.changeQuery(value);
+                        }
+                      },
                       autocorrect: false,
                       decoration: InputDecoration(
                           hintText: 'Enter Your Query Here',
@@ -243,6 +282,29 @@ class _ChatbotPageState extends State<ChatbotPage> {
                         ),
                       )),
                 )),
+          ),
+        ],
+      ),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: '1',
+            child: Icon(Icons.keyboard_arrow_up),
+            onPressed: () {
+              _draggableScrollbarController.animateTo(_draggableScrollbarController.position.maxScrollExtent, duration: Duration(milliseconds: 5000), curve: Curves.linear);
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: FloatingActionButton(
+              heroTag: '2',
+              child: Icon(Icons.keyboard_arrow_down),
+              onPressed: () {
+                _draggableScrollbarController.animateTo(_draggableScrollbarController.position.minScrollExtent, duration: Duration(milliseconds: 1000), curve: Curves.linear);
+              },
+            ),
           ),
         ],
       ),

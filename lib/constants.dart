@@ -16,3 +16,5 @@ const double defaultFontSize = 20.0;
 String apiFetchKeyword = 'askDistrict';
 
 const bigWindowSize = 800;
+
+const statesAndDistrictsURL = 'https://life-api.coronasafe.network/data/states.json';

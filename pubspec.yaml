@@ -26,6 +26,7 @@ dependencies:
 
   #for state management
   flutter_bloc: ^7.0.0
+  get: ^4.1.4
 
   #dialogflow for chatbot
   flutter_dialogflow: ^0.1.3
