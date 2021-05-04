@@ -48,6 +48,8 @@ class SuggestionsController extends GetxController {
         break;
         default: print('No suggestions to be suggested');
       }
+    } else {
+      shouldShowSuggestions.value = false;
     }
   }
 
