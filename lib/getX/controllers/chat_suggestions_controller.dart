@@ -26,16 +26,17 @@ class ChatSuggestionsController extends GetxController {
     super.onInit();
   }
 
-  Rx<bool> sendUserQuery = true.obs;
+  Rx<bool> sendUserQuery = false.obs;
   Rx<bool> shouldShowSuggestions = false.obs;
   RxList<Option> suggestions = <Option>[].obs;
-  Rx<String> _userQuery = ''.obs;
+  Rx<String> userQuery = ''.obs;
 
   Rx<SuggestionType> suggestionType = SuggestionType.state.obs;
-
+  Rx<String> suggestionSelected = ''.obs;
+  
   void changeQuery(String query) {
-    _userQuery.value = query;
-    if(_userQuery.value != null && _userQuery.value.isNotEmpty) {
+    userQuery.value = query;
+    if(userQuery.value != null && userQuery.value.trim().isNotEmpty) {
       switch(suggestionType.value) {
         case SuggestionType.state:
           _filterStates();
@@ -49,19 +50,36 @@ class ChatSuggestionsController extends GetxController {
         default: print('No suggestions to be suggested');
       }
     } else {
+      suggestions.value = [];
       shouldShowSuggestions.value = false;
     }
   }
 
+  void changeSendUserQuery(bool shouldSend) {
+    sendUserQuery.value = shouldSend;
+  }
+  
+  void changeSuggestionType(SuggestionType suggestionTypeValue) {
+    suggestionType.value = suggestionTypeValue;
+    suggestions.value = [];
+  }
+  
+  void setSuggestionSelected(String suggestion) {
+    suggestionSelected.value = suggestion;
+    suggestions.value = [];
+    shouldShowSuggestions.value = false;
+  }
+  
   void _filterStates() {
     if(statesAndDistricts != null) {
       shouldShowSuggestions.value = true;
 
       List<Option> suggestionsList = [];
 
-      Map<String, dynamic> statesMatched = Map.from(statesAndDistricts)..removeWhere((k, v) => !k.trim().toLowerCase().contains(_userQuery.value.trim().toLowerCase()));
-      statesMatched.forEach((key, value) {
-        suggestionsList.add(Option(queryForChatbot: key, message: key));
+      statesAndDistricts.forEach((key, value) {
+        if(key.trim().toLowerCase().contains(userQuery.value.trim().toLowerCase())) {
+          suggestionsList.add(Option(queryForChatbot: key, message: key));
+        }
       });
 
       suggestions.value = suggestionsList;
@@ -69,6 +87,24 @@ class ChatSuggestionsController extends GetxController {
   }
 
   void _filterDistricts() {
+    if(statesAndDistricts != null && suggestionSelected != null) {
+      shouldShowSuggestions.value = true;
 
+      List<Option> suggestionsList = [];
+
+      print('Selected state: ${statesAndDistricts[suggestionSelected]}');
+      if(statesAndDistricts[suggestionSelected] != null) {
+        List<dynamic> districts = statesAndDistricts[suggestionSelected];
+        districts.forEach(
+            (district) {
+              if(district.trim().toLowerCase().contains(userQuery.value.trim().toLowerCase())) {
+                suggestionsList.add(Option(queryForChatbot: district, message: district));
+              }
+            }
+        );
+
+        suggestions.value = suggestionsList;
+      }
+    }
   }
 }

@@ -27,7 +27,8 @@ class ChatbotPage extends StatefulWidget {
 class _ChatbotPageState extends State<ChatbotPage> {
   TextEditingController queryTextFormFieldController = TextEditingController();
   ScrollController _draggableScrollbarController =
-      ScrollController(keepScrollOffset: true);
+  ScrollController(keepScrollOffset: true);
+  ScrollController _suggestionsScrollController = ScrollController();
 
   ChatbotBloc chatBloc;
   SharedPreferencesBloc sharedPreferencesBloc;
@@ -102,42 +103,68 @@ class _ChatbotPageState extends State<ChatbotPage> {
     }
 
     ChatSuggestionsController suggestionsController =
-        Get.find<ChatSuggestionsController>();
-    WidgetDataController widgetDataController = Get.find<WidgetDataController>();
+    Get.find<ChatSuggestionsController>();
+    WidgetDataController widgetDataController =
+    Get.find<WidgetDataController>();
 
     OverlayEntry previousOverlay;
 
     suggestionsController.suggestions.stream.listen((suggestions) {
-      if(suggestionsController.shouldShowSuggestions.value) {
-        OverlayEntry overlayEntry = OverlayEntry(builder: (BuildContext context) {
-          return Positioned(
-            height: (MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom) - widgetDataController.getSize(chatFieldKey).height,
-            width: MediaQuery.of(context).size.width,
-            top: widgetDataController.getSize(appbarKey).height,
-            child: SingleChildScrollView(
-              child: Wrap(
-                direction: Axis.horizontal,
-                  children: suggestions
-                      .map((Option suggestion) => LimitedBox(
-                    maxWidth: MediaQuery.of(context).size.width - 8,
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: ElevatedButton(
-                            onPressed: () => clearTextBoxAndSendQuery(query: suggestion.queryForChatbot, sendMessageToDialogflow: chatBloc.chatList[0].sendMessageToDialogFlow, action: chatBloc.chatList[0].action),
+      if (suggestionsController.shouldShowSuggestions.value) {
+        OverlayEntry overlayEntry = OverlayEntry(
+          builder: (BuildContext context) {
+            const double padding = 4.0;
+            const double bottomPadding = 70.0;
+
+            return Positioned(
+              width: MediaQuery.of(context).size.width,
+              top: widgetDataController.getSize(appbarKey).height,
+              bottom: (MediaQuery.of(context).viewInsets.bottom + (widgetDataController.getSize(chatFieldKey).height + bottomPadding)).abs(),
+              child: Scrollbar(
+                controller: _suggestionsScrollController,
+                isAlwaysShown: true,
+                child: SingleChildScrollView(
+                  controller: _suggestionsScrollController,
+                  child: Wrap(
+                      direction: Axis.horizontal,
+                      children: suggestions
+                          .map((Option suggestion) => LimitedBox(
+                        maxWidth:
+                        MediaQuery.of(context).size.width - padding,
+                        child: Padding(
+                          padding: const EdgeInsets.all(padding),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              suggestionsController.setSuggestionSelected(suggestion.message);
+
+                              clearTextBoxAndSendQuery(
+                                query: suggestion.queryForChatbot,
+                                sendMessageToDialogflow: chatBloc
+                                    .chatList[0].sendMessageToDialogFlow,
+                                action: chatBloc.chatList[0].action);
+                            },
                             child: Container(
-                                child: Text(suggestion.message, style: Theme.of(context).textTheme.bodyText1,)
-                            ),
+                                child: Text(
+                                  suggestion.message,
+                                  style:
+                                  Theme.of(context).textTheme.bodyText1,
+                                )),
                             style: ButtonStyle(
-                              shape: MaterialStateProperty.all(StadiumBorder()),
-                              backgroundColor: MaterialStateProperty.all(Colors.deepPurpleAccent.withOpacity(0.9)),
+                              shape: MaterialStateProperty.all(
+                                  StadiumBorder()),
+                              backgroundColor: MaterialStateProperty.all(
+                                  Colors.deepPurpleAccent
+                                      .withOpacity(0.9)),
                             ),
                           ),
-                    ),
+                        ),
                       ))
-                      .toList()),
-            ),
-          );
-        }, );
+                          .toList()),
+                ),
+              ),
+            );
+          },
+        );
 
         if (suggestions != null && suggestions.isNotEmpty) {
           if (previousOverlay != null) previousOverlay.remove();
@@ -192,7 +219,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
         bool sendMessageToDialogflow = true}) {
     queryTextFormFieldController.clear();
 
-    print('sending permision: $sendMessageToDialogflow');
+    suggestionsController.setSuggestionSelected(query);
+
     chatBloc.add(SendQueryAndYieldMessageEvent(
         query: query,
         action: action,
@@ -200,7 +228,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
   }
 
   ChatSuggestionsController suggestionsController =
-      Get.put(ChatSuggestionsController());
+  Get.put(ChatSuggestionsController());
 
   @override
   Widget build(BuildContext context) {
@@ -224,98 +252,96 @@ class _ChatbotPageState extends State<ChatbotPage> {
           Flexible(
             child: BlocBuilder<ChatbotBloc, ChatbotState>(
                 builder: (BuildContext context, ChatbotState state) {
-              if (state is MessageAddedState) {
-                List<Message> chatList = state.chatList;
-                _message = chatList[0];
+                  if (state is MessageAddedState) {
+                    List<Message> chatList = state.chatList;
+                    _message = chatList[0];
 
-                return ListView.builder(
-                    reverse: true,
-                    controller: _draggableScrollbarController,
-                    itemCount: chatList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      Message message = chatList[index];
-                      bool chatbotSender = message.sender == Sender.chatbot;
+                    return ListView.builder(
+                        reverse: true,
+                        controller: _draggableScrollbarController,
+                        itemCount: chatList.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          Message message = chatList[index];
+                          bool chatbotSender = message.sender == Sender.chatbot;
 
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: chatbotSender
-                              ? MainAxisAlignment.start
-                              : MainAxisAlignment.end,
-                          children: [
-                            CircleAvatar(
-                              child: chatbotSender
-                                  ? Icon(Icons.computer)
-                                  : Icon(Icons.person),
-                              backgroundColor: Colors.black,
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: chatbotSender
+                                  ? MainAxisAlignment.start
+                                  : MainAxisAlignment.end,
+                              children: [
+                                CircleAvatar(
+                                  child: chatbotSender
+                                      ? Icon(Icons.computer)
+                                      : Icon(Icons.person),
+                                  backgroundColor: Colors.black,
+                                ),
+                                ChatMessage(message: message, index: index),
+                              ],
                             ),
-                            ChatMessage(message: message, index: index),
-                          ],
-                        ),
-                      );
-                    });
-              } else {
-                return Container();
-              }
-            }),
+                          );
+                        });
+                  } else {
+                    return Container();
+                  }
+                }),
           ),
           Divider(
             thickness: 1.0,
           ),
-          Container(
+          Padding(
             key: chatFieldKey,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 4.0),
-              child: ListTile(
-                  title: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Container(
-                      child: TextFormField(
-                        onFieldSubmitted: (String query) =>
-                            clearTextBoxAndSendQuery(
-                                query: query,
-                                action: _message.action,
-                                sendMessageToDialogflow:
-                                    _message.sendMessageToDialogFlow),
-                        //query from text controller will also work fine
-                        style: Theme.of(context).textTheme.bodyText1,
-                        onChanged: (String value) {
-                          if (suggestionsController.sendUserQuery.value) {
-                            suggestionsController.changeQuery(value);
-                          }
-                        },
-                        autocorrect: false,
-                        decoration: InputDecoration(
-                            hintText: 'Enter Your Query Here',
-                            border: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    width: 1.0,
-                                    color: Colors.red,
-                                    style: BorderStyle.solid),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20.0)))),
-                        controller: queryTextFormFieldController,
-                      ),
+            padding: const EdgeInsets.only(bottom: 4.0),
+            child: ListTile(
+                title: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Container(
+                    child: TextFormField(
+                      onFieldSubmitted: (String query) =>
+                          clearTextBoxAndSendQuery(
+                              query: query,
+                              action: _message.action,
+                              sendMessageToDialogflow:
+                              _message.sendMessageToDialogFlow),
+                      //query from text controller will also work fine
+                      style: Theme.of(context).textTheme.bodyText1,
+                      onChanged: (String value) {
+                        if (suggestionsController.sendUserQuery.value) {
+                          suggestionsController.changeQuery(value);
+                        }
+                      },
+                      autocorrect: false,
+                      decoration: InputDecoration(
+                          hintText: 'Enter Your Query Here',
+                          border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  width: 1.0,
+                                  color: Colors.red,
+                                  style: BorderStyle.solid),
+                              borderRadius:
+                              BorderRadius.all(Radius.circular(20.0)))),
+                      controller: queryTextFormFieldController,
                     ),
                   ),
-                  trailing: Padding(
-                    padding: EdgeInsets.all(4.0),
-                    child: ClipOval(
-                        child: Tooltip(
-                      message: 'Send',
-                      preferBelow: false,
-                      child: IconButton(
-                        icon: Icon(Icons.send),
-                        iconSize: 30.0,
-                        onPressed: () => clearTextBoxAndSendQuery(
-                            query: queryTextFormFieldController.text,
-                            action: _message.action,
-                            sendMessageToDialogflow:
-                                _message.sendMessageToDialogFlow),
-                      ),
-                    )),
-                  )),
-            ),
+                ),
+                trailing: Padding(
+                  padding: EdgeInsets.all(4.0),
+                  child: ClipOval(
+                      child: Tooltip(
+                        message: 'Send',
+                        preferBelow: false,
+                        child: IconButton(
+                          icon: Icon(Icons.send),
+                          iconSize: 30.0,
+                          onPressed: () => clearTextBoxAndSendQuery(
+                              query: queryTextFormFieldController.text,
+                              action: _message.action,
+                              sendMessageToDialogflow:
+                              _message.sendMessageToDialogFlow),
+                        ),
+                      )),
+                )),
           ),
         ],
       ),
@@ -396,10 +422,10 @@ class _ChatMessageState extends State<ChatMessage> {
             child: InkWell(
               onTap: () => optionPresent
                   ? chatbotBloc.add(SendQueryAndYieldMessageEvent(
-                      query: widget.message.option.queryForChatbot,
-                      action: widget.message.action,
-                      sendMessageToDialogFlow:
-                          widget.message.sendMessageToDialogFlow))
+                  query: widget.message.option.queryForChatbot,
+                  action: widget.message.action,
+                  sendMessageToDialogFlow:
+                  widget.message.sendMessageToDialogFlow))
                   : null,
               child: Container(
                 width: screenSize.width > constants.bigWindowSize
@@ -407,8 +433,8 @@ class _ChatMessageState extends State<ChatMessage> {
                     : screenSize.width * 0.7,
                 color: widget.message.sender == Sender.chatbot
                     ? optionPresent
-                        ? Colors.red
-                        : Colors.orangeAccent
+                    ? Colors.red
+                    : Colors.orangeAccent
                     : Colors.greenAccent,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -417,9 +443,9 @@ class _ChatMessageState extends State<ChatMessage> {
                         ? CrossFadeState.showFirst
                         : CrossFadeState.showSecond,
                     duration: widget.index == 0 &&
-                            widget.message.sender == Sender.chatbot
+                        widget.message.sender == Sender.chatbot
                         ? constants
-                            .fadeDurationBetweenProgressIndicatorAndMessage
+                        .fadeDurationBetweenProgressIndicatorAndMessage
                         : Duration(microseconds: 1),
                     firstChild: Align(
                       alignment: Alignment.centerLeft,
@@ -436,33 +462,33 @@ class _ChatMessageState extends State<ChatMessage> {
                     ),
                     secondChild: optionPresent
                         ? Linkify(
-                            onOpen: (link) async {
-                              await _launchURL(link);
-                            },
-                            linkifiers: [
-                              UrlLinkifier(),
-                              PhoneNumberLinkifier(),
-                              EmailLinkifier(),
-                            ],
-                            text: optionPresent
-                                ? widget.message.option.message
-                                : widget.message.message,
-                            style: Theme.of(context).textTheme.bodyText1,
-                          )
+                      onOpen: (link) async {
+                        await _launchURL(link);
+                      },
+                      linkifiers: [
+                        UrlLinkifier(),
+                        PhoneNumberLinkifier(),
+                        EmailLinkifier(),
+                      ],
+                      text: optionPresent
+                          ? widget.message.option.message
+                          : widget.message.message,
+                      style: Theme.of(context).textTheme.bodyText1,
+                    )
                         : SelectableLinkify(
-                            onOpen: (link) async {
-                              await _launchURL(link);
-                            },
-                            linkifiers: [
-                              UrlLinkifier(),
-                              PhoneNumberLinkifier(),
-                              EmailLinkifier(),
-                            ],
-                            text: optionPresent
-                                ? widget.message.option.message
-                                : widget.message.message,
-                            style: Theme.of(context).textTheme.bodyText1,
-                          ),
+                      onOpen: (link) async {
+                        await _launchURL(link);
+                      },
+                      linkifiers: [
+                        UrlLinkifier(),
+                        PhoneNumberLinkifier(),
+                        EmailLinkifier(),
+                      ],
+                      text: optionPresent
+                          ? widget.message.option.message
+                          : widget.message.message,
+                      style: Theme.of(context).textTheme.bodyText1,
+                    ),
                   ),
                 ),
               ),

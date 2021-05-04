@@ -65,11 +65,6 @@ class MyApp extends StatelessWidget {
               ..add(SendMessageFromChatbotEvent(
                   message: '',
                   option: Option(
-                      message: 'Plasma'.tr(),
-                      queryForChatbot: 'plasma')))
-              ..add(SendMessageFromChatbotEvent(
-                  message: '',
-                  option: Option(
                       message: 'Oxygen'.tr(),
                       queryForChatbot: 'oxygen')))
               ..add(SendMessageFromChatbotEvent(

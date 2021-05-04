@@ -106,8 +106,8 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
                 sendMessageToDialogflow: false);
 
             Get.find<ChatSuggestionsController>()
-              ..sendUserQuery.value = true
-              ..suggestionType.value = SuggestionType.state;
+              ..changeSendUserQuery(true)
+              ..changeSuggestionType(SuggestionType.state);
 
           } else {
             await _addAnswerFromChatbot(message: responseFromChatbot);
@@ -143,14 +143,27 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
                   message:
                       'StateNotAvailable'.tr(),
                   waitForSometime: true);
+
+              Get.find<ChatSuggestionsController>()
+                ..changeSendUserQuery(false)
+                ..changeSuggestionType(SuggestionType.none);
+
             } else {
               await _addAnswerFromChatbot(
                   message: 'AskDistrict'.tr(),
                   action: 'fetchResult',
                   sendMessageToDialogflow: false,
                   waitForSometime: true);
+
+              Get.find<ChatSuggestionsController>()
+                ..changeSendUserQuery(true)
+                ..changeSuggestionType(SuggestionType.district);
             }
           } else if (event.action == 'fetchResult') {
+            Get.find<ChatSuggestionsController>()
+              ..changeSendUserQuery(false)
+              ..changeSuggestionType(SuggestionType.none);
+
             dataFilteredList = dataFilteredList
                 .where((data) => data["district"]
                     .toLowerCase()
