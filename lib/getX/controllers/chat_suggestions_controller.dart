@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 
 enum SuggestionType { state, district, none }
 
-class SuggestionsController extends GetxController {
+class ChatSuggestionsController extends GetxController {
   Map<String, dynamic> statesAndDistricts;
 
   @override
@@ -26,12 +26,12 @@ class SuggestionsController extends GetxController {
     super.onInit();
   }
 
-  Rx<bool> sendUserQuery = false.obs;
+  Rx<bool> sendUserQuery = true.obs;
   Rx<bool> shouldShowSuggestions = false.obs;
   RxList<Option> suggestions = <Option>[].obs;
   Rx<String> _userQuery = ''.obs;
 
-  Rx<SuggestionType> suggestionType = SuggestionType.none.obs;
+  Rx<SuggestionType> suggestionType = SuggestionType.state.obs;
 
   void changeQuery(String query) {
     _userQuery.value = query;

@@ -5,7 +5,8 @@ import 'package:covibot/blocs/settings_bloc.dart';
 import 'package:covibot/blocs/shared_preferences_bloc.dart';
 import 'package:covibot/classes/message.dart';
 import 'package:covibot/constants.dart' as constants;
-import 'package:covibot/getX/controllers/suggestions_controller.dart';
+import 'package:covibot/getX/controllers/chat_suggestions_controller.dart';
+import 'package:covibot/getX/controllers/widget_data_controller.dart';
 import 'package:covibot/library_extensions/phone_number_url.dart';
 import 'package:covibot/screens/settings_page.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -31,6 +32,9 @@ class _ChatbotPageState extends State<ChatbotPage> {
   ChatbotBloc chatBloc;
   SharedPreferencesBloc sharedPreferencesBloc;
   bool _firstTime;
+
+  GlobalKey appbarKey = GlobalKey();
+  GlobalKey chatFieldKey = GlobalKey();
 
   @override
   void initState() {
@@ -97,32 +101,43 @@ class _ChatbotPageState extends State<ChatbotPage> {
             updateMap: {'visitorCount': FieldValue.increment(1)}));
     }
 
-    SuggestionsController suggestionsController =
-        Get.find<SuggestionsController>();
+    ChatSuggestionsController suggestionsController =
+        Get.find<ChatSuggestionsController>();
+    WidgetDataController widgetDataController = Get.find<WidgetDataController>();
 
     OverlayEntry previousOverlay;
 
     suggestionsController.suggestions.stream.listen((suggestions) {
       if(suggestionsController.shouldShowSuggestions.value) {
         OverlayEntry overlayEntry = OverlayEntry(builder: (BuildContext context) {
-          return Container(
-            color: Colors.black.withOpacity(0.2),
-            child: Wrap(
-                children: suggestions
-                    .map((Option suggestion) => Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ElevatedButton(
-                      onPressed: () => clearTextBoxAndSendQuery(query: suggestion.queryForChatbot, sendMessageToDialogflow: chatBloc.chatList[0].sendMessageToDialogFlow, action: chatBloc.chatList[0].action),
-                      child: Text(suggestion.message, style: Theme.of(context).textTheme.bodyText1,),
-                      style: ButtonStyle(
-                        shape: MaterialStateProperty.all(StadiumBorder()),
-                        backgroundColor: MaterialStateProperty.all(Colors.deepPurpleAccent.withOpacity(0.9)),
-                      ),
-                    )
-                ))
-                    .toList()),
+          return Positioned(
+            height: (MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom) - widgetDataController.getSize(chatFieldKey).height,
+            width: MediaQuery.of(context).size.width,
+            top: widgetDataController.getSize(appbarKey).height,
+            child: SingleChildScrollView(
+              child: Wrap(
+                direction: Axis.horizontal,
+                  children: suggestions
+                      .map((Option suggestion) => LimitedBox(
+                    maxWidth: MediaQuery.of(context).size.width - 8,
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: ElevatedButton(
+                            onPressed: () => clearTextBoxAndSendQuery(query: suggestion.queryForChatbot, sendMessageToDialogflow: chatBloc.chatList[0].sendMessageToDialogFlow, action: chatBloc.chatList[0].action),
+                            child: Container(
+                                child: Text(suggestion.message, style: Theme.of(context).textTheme.bodyText1,)
+                            ),
+                            style: ButtonStyle(
+                              shape: MaterialStateProperty.all(StadiumBorder()),
+                              backgroundColor: MaterialStateProperty.all(Colors.deepPurpleAccent.withOpacity(0.9)),
+                            ),
+                          ),
+                    ),
+                      ))
+                      .toList()),
+            ),
           );
-        });
+        }, );
 
         if (suggestions != null && suggestions.isNotEmpty) {
           if (previousOverlay != null) previousOverlay.remove();
@@ -184,8 +199,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
         sendMessageToDialogFlow: sendMessageToDialogflow));
   }
 
-  SuggestionsController suggestionsController =
-      Get.put(SuggestionsController());
+  ChatSuggestionsController suggestionsController =
+      Get.put(ChatSuggestionsController());
 
   @override
   Widget build(BuildContext context) {
@@ -193,6 +208,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
     return Scaffold(
       appBar: AppBar(
+        key: appbarKey,
         title: Text('CoviBot'.tr()),
         actions: [
           IconButton(
@@ -246,57 +262,60 @@ class _ChatbotPageState extends State<ChatbotPage> {
           Divider(
             thickness: 1.0,
           ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4.0),
-            child: ListTile(
-                title: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Container(
-                    child: TextFormField(
-                      onFieldSubmitted: (String query) =>
-                          clearTextBoxAndSendQuery(
-                              query: query,
-                              action: _message.action,
-                              sendMessageToDialogflow:
-                                  _message.sendMessageToDialogFlow),
-                      //query from text controller will also work fine
-                      style: Theme.of(context).textTheme.bodyText1,
-                      onChanged: (String value) {
-                        if (suggestionsController.sendUserQuery.value) {
-                          suggestionsController.changeQuery(value);
-                        }
-                      },
-                      autocorrect: false,
-                      decoration: InputDecoration(
-                          hintText: 'Enter Your Query Here',
-                          border: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  width: 1.0,
-                                  color: Colors.red,
-                                  style: BorderStyle.solid),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(20.0)))),
-                      controller: queryTextFormFieldController,
+          Container(
+            key: chatFieldKey,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 4.0),
+              child: ListTile(
+                  title: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Container(
+                      child: TextFormField(
+                        onFieldSubmitted: (String query) =>
+                            clearTextBoxAndSendQuery(
+                                query: query,
+                                action: _message.action,
+                                sendMessageToDialogflow:
+                                    _message.sendMessageToDialogFlow),
+                        //query from text controller will also work fine
+                        style: Theme.of(context).textTheme.bodyText1,
+                        onChanged: (String value) {
+                          if (suggestionsController.sendUserQuery.value) {
+                            suggestionsController.changeQuery(value);
+                          }
+                        },
+                        autocorrect: false,
+                        decoration: InputDecoration(
+                            hintText: 'Enter Your Query Here',
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    width: 1.0,
+                                    color: Colors.red,
+                                    style: BorderStyle.solid),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20.0)))),
+                        controller: queryTextFormFieldController,
+                      ),
                     ),
                   ),
-                ),
-                trailing: Padding(
-                  padding: EdgeInsets.all(4.0),
-                  child: ClipOval(
-                      child: Tooltip(
-                    message: 'Send',
-                    preferBelow: false,
-                    child: IconButton(
-                      icon: Icon(Icons.send),
-                      iconSize: 30.0,
-                      onPressed: () => clearTextBoxAndSendQuery(
-                          query: queryTextFormFieldController.text,
-                          action: _message.action,
-                          sendMessageToDialogflow:
-                              _message.sendMessageToDialogFlow),
-                    ),
+                  trailing: Padding(
+                    padding: EdgeInsets.all(4.0),
+                    child: ClipOval(
+                        child: Tooltip(
+                      message: 'Send',
+                      preferBelow: false,
+                      child: IconButton(
+                        icon: Icon(Icons.send),
+                        iconSize: 30.0,
+                        onPressed: () => clearTextBoxAndSendQuery(
+                            query: queryTextFormFieldController.text,
+                            action: _message.action,
+                            sendMessageToDialogflow:
+                                _message.sendMessageToDialogFlow),
+                      ),
+                    )),
                   )),
-                )),
+            ),
           ),
         ],
       ),

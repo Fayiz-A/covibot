@@ -6,6 +6,7 @@ import 'package:covibot/blocs/shared_preferences_bloc.dart';
 import 'package:covibot/classes/message.dart';
 import 'package:covibot/constants.dart' as constants;
 import 'package:covibot/getX/bindings/chatbot_page_bindings.dart';
+import 'package:covibot/getX/controllers/widget_data_controller.dart';
 import 'package:covibot/screens/chatbot_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -13,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart' hide Trans;
 
-import 'getX/controllers/suggestions_controller.dart';
+import 'getX/controllers/chat_suggestions_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +46,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put<SuggestionsController>(SuggestionsController());
+    Get.put<ChatSuggestionsController>(ChatSuggestionsController());
+    Get.put<WidgetDataController>(WidgetDataController());
     Locale locale = context.locale;
 
     return MultiBlocProvider(

@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:covibot/classes/general_functions/language.dart';
 import 'package:covibot/classes/message.dart';
 import 'package:covibot/constants.dart' as constants;
-import 'package:covibot/getX/controllers/suggestions_controller.dart';
+import 'package:covibot/getX/controllers/chat_suggestions_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dialogflow/dialogflow_v2.dart';
@@ -105,7 +105,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
                 action: 'askDistrict',
                 sendMessageToDialogflow: false);
 
-            Get.find<SuggestionsController>()
+            Get.find<ChatSuggestionsController>()
               ..sendUserQuery.value = true
               ..suggestionType.value = SuggestionType.state;
 
