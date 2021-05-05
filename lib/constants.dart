@@ -7,7 +7,7 @@ String noInternetMessage = 'NoInternetMessage'.tr();
 String errorMessage = 'ErrorMessage'.tr();
 
 const Duration messageDurationForCornerCaseMessages = Duration(milliseconds: 1500);
-const Duration durationBeforeRenderingProgressIndicator = Duration(milliseconds: 150);
+const Duration durationBeforeRenderingProgressIndicator = Duration(milliseconds: 500);
 const Duration fadeDurationBetweenProgressIndicatorAndMessage = Duration(milliseconds: 200);
 
 const ThemeMode defaultThemeMode = ThemeMode.dark;

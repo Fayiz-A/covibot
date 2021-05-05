@@ -258,6 +258,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
                     return ListView.builder(
                         reverse: true,
+                        physics: ClampingScrollPhysics(),
                         controller: _draggableScrollbarController,
                         itemCount: chatList.length,
                         itemBuilder: (BuildContext context, int index) {

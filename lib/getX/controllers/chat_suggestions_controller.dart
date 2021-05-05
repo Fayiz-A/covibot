@@ -65,6 +65,7 @@ class ChatSuggestionsController extends GetxController {
   }
   
   void setSuggestionSelected(String suggestion) {
+    print('Suggestion selected by the user now is $suggestion');
     suggestionSelected.value = suggestion;
     suggestions.value = [];
     shouldShowSuggestions.value = false;
@@ -92,9 +93,8 @@ class ChatSuggestionsController extends GetxController {
 
       List<Option> suggestionsList = [];
 
-      print('Selected state: ${statesAndDistricts[suggestionSelected]}');
-      if(statesAndDistricts[suggestionSelected] != null) {
-        List<dynamic> districts = statesAndDistricts[suggestionSelected];
+      if(statesAndDistricts[suggestionSelected.value] != null) {
+        List<dynamic> districts = statesAndDistricts[suggestionSelected.value];
         districts.forEach(
             (district) {
               if(district.trim().toLowerCase().contains(userQuery.value.trim().toLowerCase())) {
