@@ -5,12 +5,13 @@ import 'package:covibot/classes/general_functions/language.dart';
 import 'package:covibot/classes/message.dart';
 import 'package:covibot/constants.dart' as constants;
 import 'package:covibot/getX/controllers/chat_suggestions_controller.dart';
+import 'package:covibot/getX/data_holders/api_data_holder.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dialogflow/dialogflow_v2.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:http/http.dart' as http;
-import 'package:easy_localization/easy_localization.dart';
 
 abstract class ChatbotEvent {}
 
@@ -21,8 +22,8 @@ class SendQueryAndYieldMessageEvent extends ChatbotEvent {
 
   SendQueryAndYieldMessageEvent(
       {@required this.query,
-      this.action,
-      this.sendMessageToDialogFlow = false});
+        this.action,
+        this.sendMessageToDialogFlow = false});
 }
 
 class SendMessageFromChatbotEvent extends ChatbotEvent {
@@ -33,9 +34,9 @@ class SendMessageFromChatbotEvent extends ChatbotEvent {
 
   SendMessageFromChatbotEvent(
       {@required this.message,
-      this.option,
-      this.action,
-      this.sendMessageToDialogFlow = false});
+        this.option,
+        this.action,
+        this.sendMessageToDialogFlow = false});
 }
 
 //TODO: Refactor this to change chatbot locale and introduce parameters for accepting locale. Right now it is toggle as there are only two locales en-UK and hi-IN
@@ -54,9 +55,11 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
 
   Locale chatbotLocale = Locale('en', 'UK');
 
-  var apiResonse;
-  List dataFilteredList = [];
+  // var apiResonse;
+  // List dataFilteredList = [];
   String actionType;
+  String stateNameInAPIFormat;
+  String districtNameInAPIFormat;
 
   @override
   Stream<ChatbotState> mapEventToState(ChatbotEvent event) async* {
@@ -83,22 +86,23 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
           List responseListMessages = aiResponse.getListMessage();
 
           String responseFromChatbot =
-              responseListMessages[0]["text"]["text"][0].toString();
+          responseListMessages[0]["text"]["text"][0].toString();
 
           String action = aiResponse.queryResult.action;
 
           print(action);
 
-          if (action != null && action.contains(constants.apiFetchKeyword) &&
+          if (action != null &&
+              action.contains(constants.apiFetchKeyword) &&
               responseListMessages.length == 2 &&
               responseListMessages[1]["payload"] != null) {
             actionType = action
                 .substring(constants.apiFetchKeyword.length)
                 .trim()
                 .toLowerCase();
-            var httpResponse =
-                await http.get(responseListMessages[1]["payload"]["api"]);
-            apiResonse = jsonDecode(httpResponse.body);
+            // var httpResponse =
+            //     await http.get(responseListMessages[1]["payload"]["api"]);
+            // apiResonse = jsonDecode(httpResponse.body);
 
             await _addAnswerFromChatbot(
                 message: responseFromChatbot,
@@ -108,7 +112,6 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
             Get.find<ChatSuggestionsController>()
               ..changeSendUserQuery(true)
               ..changeSuggestionType(SuggestionType.state);
-
           } else {
             await _addAnswerFromChatbot(message: responseFromChatbot);
           }
@@ -128,26 +131,26 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
 
           print('response: $responseFromChatbot');
         } else {
-          if (event.action == 'askDistrict') {
-            dataFilteredList = apiResonse["data"]
-                .where((data) => data["state"]
-                        .toLowerCase()
-                        .trim()
-                        .contains(query.toLowerCase().trim())
-                    ? true
-                    : false)
-                .toList();
+          Map<dynamic, dynamic> statesAndDistricts =
+              Get.find<ApiDataHolder>().statesAndDistricts;
 
-            if (dataFilteredList.length <= 0) {
+          if (event.action == 'askDistrict') {
+            statesAndDistricts.forEach((stateName, value) {
+              if (stateName
+                  .trim()
+                  .toLowerCase()
+                  .contains(query.trim().toLowerCase())) {
+                stateNameInAPIFormat = stateName;
+              }
+            });
+
+            if (stateNameInAPIFormat == null) {
               await _addAnswerFromChatbot(
-                  message:
-                      'StateNotAvailable'.tr(),
-                  waitForSometime: true);
+                  message: 'StateNotAvailable'.tr(), waitForSometime: true);
 
               Get.find<ChatSuggestionsController>()
                 ..changeSendUserQuery(false)
                 ..changeSuggestionType(SuggestionType.none);
-
             } else {
               await _addAnswerFromChatbot(
                   message: 'AskDistrict'.tr(),
@@ -159,27 +162,73 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
                 ..changeSendUserQuery(true)
                 ..changeSuggestionType(SuggestionType.district);
             }
+
+            // dataFilteredList = apiResonse["data"]
+            //     .where((data) => data["state"]
+            //             .toLowerCase()
+            //             .trim()
+            //             .contains(query.toLowerCase().trim())
+            //         ? true
+            //         : false)
+            //     .toList();
+
+            // if (dataFilteredList.length <= 0) {
+            //   await _addAnswerFromChatbot(
+            //       message:
+            //           'StateNotAvailable'.tr(),
+            //       waitForSometime: true);
+            //
+            //   Get.find<ChatSuggestionsController>()
+            //     ..changeSendUserQuery(false)
+            //     ..changeSuggestionType(SuggestionType.none);
+            //
+            // } else {
+            //   await _addAnswerFromChatbot(
+            //       message: 'AskDistrict'.tr(),
+            //       action: 'fetchResult',
+            //       sendMessageToDialogflow: false,
+            //       waitForSometime: true);
+            //
+            //   Get.find<ChatSuggestionsController>()
+            //     ..changeSendUserQuery(true)
+            //     ..changeSuggestionType(SuggestionType.district);
+            // }
           } else if (event.action == 'fetchResult') {
             Get.find<ChatSuggestionsController>()
               ..changeSendUserQuery(false)
               ..changeSuggestionType(SuggestionType.none);
 
-            dataFilteredList = dataFilteredList
-                .where((data) => data["district"]
-                    .toLowerCase()
+            if (statesAndDistricts[stateNameInAPIFormat] != null) {
+              List<dynamic> districts =
+              statesAndDistricts[stateNameInAPIFormat];
+              districts.forEach((district) {
+                if (district
                     .trim()
-                    .contains(query.toLowerCase().trim()))
-                .toList();
+                    .toLowerCase()
+                    .contains(query.trim().toLowerCase())) {
+                  districtNameInAPIFormat = district;
+                }
+              });
 
-            if (dataFilteredList.length <= 0) {
-              await _addAnswerFromChatbot(
-                  message:
-                      'DistrictNotAvailable'.tr(),
-                  waitForSometime: true);
-            } else {
-              print(actionType);
               await _sendMessageAccordingly(actionType);
+            } else {
+              await _addAnswerFromChatbot(
+                  message: 'DistrictNotAvailable'.tr(), waitForSometime: true);
             }
+
+            // dataFilteredList = dataFilteredList
+            //     .where((data) => data["district"]
+            //         .toLowerCase()
+            //         .trim()
+            //         .contains(query.toLowerCase().trim()))
+            //     .toList();
+
+            // if (dataFilteredList.length <= 0) {
+            //   await _addAnswerFromChatbot(
+            //       message: 'DistrictNotAvailable'.tr(), waitForSometime: true);
+            // } else {
+            //   await _sendMessageAccordingly(actionType);
+            // }
           }
         }
       } on SocketException catch (socketException) {
@@ -215,17 +264,17 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
     }
 
     AuthGoogle authGoogle =
-        await AuthGoogle(fileJson: "assets/services.json").build();
+    await AuthGoogle(fileJson: "assets/services.json").build();
     dialogflow = Dialogflow(authGoogle: authGoogle, language: _language);
   }
 
   Future<void> _addAnswerFromChatbot(
       {Option option,
-      @required String message,
-      bool loading = false,
-      bool sendMessageToDialogflow = true,
-      String action,
-      bool waitForSometime = false}) async {
+        @required String message,
+        bool loading = false,
+        bool sendMessageToDialogflow = true,
+        String action,
+        bool waitForSometime = false}) async {
     if (waitForSometime)
       await Future.delayed(constants.messageDurationForCornerCaseMessages);
 
@@ -257,52 +306,64 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
   }
 
   Future<void> _sendMessageAccordingly(String actionType) async {
+
+    stateNameInAPIFormat = stateNameInAPIFormat.trim().toLowerCase().replaceAll(' ', '_');
+    districtNameInAPIFormat = districtNameInAPIFormat.trim().toLowerCase().replaceAll(' ', '_');
+
     switch (actionType) {
-      case 'plasma':
-        dataFilteredList.forEach(
-          (data) {
-            _addFieldIfNotEmpty(data, {
-              'City'.tr(): 'city',
-              'District'.tr(): 'district',
-              'State'.tr(): 'state',
-              'PhoneNo'.tr(): 'phone1',
-              'Description'.tr(): 'description',
-              'SourceLink'.tr(): 'sourceLink',
-              'Name'.tr(): 'name',
-              'Comment'.tr(): 'comment',
-              'LastVerifiedOn'.tr(): 'LastVerifiedOn'
-            },
-                substringFieldName: 'lastVerifiedOn',
-                substringEndIndex: 10
-            );
-          },
-        );
-        break;
+      // case 'plasma':
+      //   _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'plasma');
+      //   dataFilteredList.forEach(
+      //         (data) {
+      //       _addFieldIfNotEmpty(
+      //           data,
+      //           {
+      //             'City'.tr(): 'city',
+      //             'District'.tr(): 'district',
+      //             'State'.tr(): 'state',
+      //             'PhoneNo'.tr(): 'phone1',
+      //             'Description'.tr(): 'description',
+      //             'SourceLink'.tr(): 'sourceLink',
+      //             'Name'.tr(): 'name',
+      //             'Comment'.tr(): 'comment',
+      //             'LastVerifiedOn'.tr(): 'LastVerifiedOn'
+      //           },
+      //           substringFieldName: 'lastVerifiedOn',
+      //           substringEndIndex: 10);
+      //     },
+      //   );
+      //   break;
       case 'oxygen':
-        dataFilteredList.forEach(
-          (data) {
-            _addFieldIfNotEmpty(data, {
-              'City'.tr(): 'city',
-              'District'.tr(): 'district',
-              'State'.tr(): 'state',
-              'PhoneNo'.tr(): 'phone1',
-              'PhoneNo2'.tr(): 'phone2',
-              'EmailId'.tr(): 'emailId',
-              'Comment'.tr(): 'comment',
-              'SourceLink'.tr(): 'sourceLink',
-              'Description'.tr(): 'description',
-              'LastVerifiedOn'.tr(): 'lastVerifiedOn',
-              'Type'.tr(): 'type',
-            },
+        List<dynamic> dataList = await _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'oxygen');
+        print(dataList);
+        dataList.forEach(
+              (data) {
+            _addFieldIfNotEmpty(
+                data,
+                {
+                  'District'.tr(): 'district',
+                  'State'.tr(): 'state',
+                  'PhoneNo'.tr(): 'phone_1',
+                  'PhoneNo2'.tr(): 'phone_2',
+                  'EmailId'.tr(): 'email',
+                  'Address'.tr(): 'address',
+                  'Title'.tr(): 'title',
+                  'SourceLink'.tr(): 'source_link',
+                  'Description'.tr(): 'description',
+                  'Comment'.tr(): 'comment',
+                  'LastVerifiedOn'.tr(): 'last_verified_on',
+                  'Type'.tr(): 'resource type',
+                },
                 substringFieldName: 'lastVerifiedOn',
-                substringEndIndex: 10
-            );
+                substringEndIndex: 10);
           },
         );
         break;
       case 'helplinenumber':
-        dataFilteredList.forEach(
-          (data) {
+        List<Map<String, dynamic>> dataList = await _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'helpline_number');
+
+        dataList.forEach(
+              (data) {
             _addFieldIfNotEmpty(data, {
               'District'.tr(): 'district',
               'State'.tr(): 'state',
@@ -315,8 +376,10 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
         );
         break;
       case 'ambulance':
-        dataFilteredList.forEach(
-          (data) {
+        List<Map<String, dynamic>> dataList = await _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'ambulance');
+
+        dataList.forEach(
+              (data) {
             _addFieldIfNotEmpty(data, {
               'District'.tr(): 'district',
               'State'.tr(): 'state',
@@ -326,43 +389,47 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
           },
         );
         break;
-        case 'hospitalsandbeds':
-          dataFilteredList.forEach(
-            (data) {
-              _addFieldIfNotEmpty(data, {
-                'District'.tr(): 'district',
-                'State'.tr(): 'state',
-                'PhoneNo'.tr(): 'phone1',
-                'PhoneNo2'.tr(): 'phone2',
-                'Comment'.tr(): 'comment',
-                'LastVerifiedOn'.tr(): 'lastVerifiedOn',
-                'Name'.tr(): 'name'
-              },
-                  substringFieldName: 'lastVerifiedOn',
-                  substringEndIndex: 10
-              );
-            },
-          );
-        break;
-        case 'medicineavailability':
-          dataFilteredList.forEach(
-            (data) {
-              _addFieldIfNotEmpty(
-                  data,
-                  {
-                    'District'.tr(): 'district',
-                    'State'.tr(): 'state',
-                    'PhoneNo'.tr(): 'phone1',
-                    'Comment'.tr(): 'comment',
-                    'LastVerifiedOn'.tr(): 'lastVerifiedOn',
-                    'Address'.tr(): 'address',
-                    'Name'.tr(): 'name'
-                  },
+      case 'hospitalsandbeds':
+        List<Map<String, dynamic>> dataList = await _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'hospitals');
+
+        dataList.forEach(
+              (data) {
+            _addFieldIfNotEmpty(
+                data,
+                {
+                  'District'.tr(): 'district',
+                  'State'.tr(): 'state',
+                  'PhoneNo'.tr(): 'phone1',
+                  'PhoneNo2'.tr(): 'phone2',
+                  'Comment'.tr(): 'comment',
+                  'LastVerifiedOn'.tr(): 'lastVerifiedOn',
+                  'Name'.tr(): 'name'
+                },
                 substringFieldName: 'lastVerifiedOn',
-                substringEndIndex: 10
-              );
-            },
-          );
+                substringEndIndex: 10);
+          },
+        );
+        break;
+      case 'medicineavailability':
+        List<Map<String, dynamic>> dataList = await _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'medicine');
+
+        dataList.forEach(
+              (data) {
+            _addFieldIfNotEmpty(
+                data,
+                {
+                  'District'.tr(): 'district',
+                  'State'.tr(): 'state',
+                  'PhoneNo'.tr(): 'phone1',
+                  'Comment'.tr(): 'comment',
+                  'LastVerifiedOn'.tr(): 'lastVerifiedOn',
+                  'Address'.tr(): 'address',
+                  'Name'.tr(): 'name'
+                },
+                substringFieldName: 'lastVerifiedOn',
+                substringEndIndex: 10);
+          },
+        );
         break;
       default:
         await _addAnswerFromChatbot(
@@ -370,23 +437,56 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
     }
   }
 
-  Future<void> _addFieldIfNotEmpty(Map data, Map<String, String> keyFieldNameMap, {String substringFieldName, int substringEndIndex}) async {
+  Future<void> _addFieldIfNotEmpty(
+      Map data, Map<String, String> keyFieldNameMap,
+      {String substringFieldName, int substringEndIndex}) async {
     StringBuffer message = StringBuffer();
 
     keyFieldNameMap.forEach((key, value) {
-      if(data[value] != null) {
-        if(substringFieldName == value) {
+      if (data[value] != null && data[value].trim().length != 0) {
+        if (substringFieldName == value) {
           assert(substringEndIndex != null);
-          message.writeln('$key: ${data[value].toString().substring(0,substringEndIndex)}');
+          message.writeln(
+              '$key: ${data[value].toString().substring(0, substringEndIndex)}');
         } else {
           message.writeln('$key: ${data[value].toString()}');
         }
       }
     });
 
-    if(message.isNotEmpty) {
+    if (message.isNotEmpty) {
       _addAnswerFromChatbot(message: message.toString());
     }
+  }
+
+  Future<List<dynamic>> _fetchAndDecodeResourceResponse({
+    @required String state,
+    @required String district,
+    @required String resource
+  }) async {
+    
+    try {
+      Map<String, String> queryParameters = {
+        'resource': resource,
+        'state': state,
+        'district': district,
+      };
+
+      var uri = Uri.https(constants.primaryEndpoint, constants.endpointConcatenateString, queryParameters);
+
+      http.Response httpResponse = await http.get(uri, headers: {
+        HttpHeaders.contentTypeHeader: 'application/json',
+        'Access-Control-Allow-Origin': "*",
+        'Access-Control-Allow-Methods': "GET, HEAD",
+      });
+
+      var apiResponse = await jsonDecode(httpResponse.body);
+
+      return apiResponse['data'];
+    } catch(e) {
+      print('Error occurred in fetching data $e');
+    }
+    return [];
   }
 }
 

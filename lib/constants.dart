@@ -1,8 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
+const String primaryEndpoint = 'life-pipeline.coronasafe.network';
+const String endpointConcatenateString = '/api/resources';
+
 const String emptyStringQuery = 'nothing in query with passcode abc@77';
-String initialMessageFromChatbot = 'DefaultMessage';
+const String initialMessageFromChatbot = 'DefaultMessage';
 String noInternetMessage = 'NoInternetMessage'.tr();
 String errorMessage = 'ErrorMessage'.tr();
 
@@ -13,8 +16,8 @@ const Duration fadeDurationBetweenProgressIndicatorAndMessage = Duration(millise
 const ThemeMode defaultThemeMode = ThemeMode.dark;
 const double defaultFontSize = 20.0;
 
-String apiFetchKeyword = 'askDistrict';
+const String apiFetchKeyword = 'askDistrict';
 
-const bigWindowSize = 800;
+const double bigWindowSize = 800;
 
 const statesAndDistrictsURL = 'https://life-api.coronasafe.network/data/states.json';

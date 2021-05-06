@@ -37,6 +37,7 @@
   "Name": "Name",
   "LastVerifiedOn": "Last verified on",
   "Address": "Address",
+  "Title": "Title",
 
   "PlasmaData": "City: {city} \nDistrict: {district} \nState: {state} \nPhone no: {phoneNo} \nDescription: {description} \nSource: {sourceLink}",
   "OxygenData": "City: {city} \nDistrict: {district} \nState: {state} \nPhone no: {phoneNo} \nVerification: {comment} \nSource: {sourceLink}",

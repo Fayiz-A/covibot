@@ -37,6 +37,7 @@
   "Name": "नाम",
   "LastVerifiedOn": "अंतिम बार जाँच",
   "Address": "पता",
+  "Title": "Title",
 
   "PlasmaData": "City: {city} \nजिला: {district} \nराज्य: {state} \nफ़ोन नंबर: {phoneNo} \nसंदेश: {description} \nस्रोत: {sourceLink}",
   "OxygenData": "City: {city} \nजिला: {district} \nराज्य: {state} \nफ़ोन नंबर: {phoneNo} \nसंदेश: {comment} \nस्रोत: {sourceLink}",

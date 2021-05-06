@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:covibot/classes/message.dart';
 import 'package:covibot/constants.dart' as constants;
+import 'package:covibot/getX/data_holders/api_data_holder.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
@@ -16,6 +17,7 @@ class ChatSuggestionsController extends GetxController {
     try {
       http.get(constants.statesAndDistrictsURL).then((value) async {
         statesAndDistricts = await jsonDecode(value.body);
+        Get.find<ApiDataHolder>().setStatesAndDistricts(statesAndDistricts);
       });
     } on SocketException catch (e) {
       print('No internet connection $e');
