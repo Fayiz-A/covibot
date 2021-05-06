@@ -5,6 +5,7 @@ import 'package:covibot/blocs/settings_bloc.dart';
 import 'package:covibot/blocs/shared_preferences_bloc.dart';
 import 'package:covibot/classes/message.dart';
 import 'package:covibot/constants.dart' as constants;
+import 'package:covibot/getX/controllers/chat_page_controller.dart';
 import 'package:covibot/getX/controllers/chat_suggestions_controller.dart';
 import 'package:covibot/getX/controllers/widget_data_controller.dart';
 import 'package:covibot/library_extensions/phone_number_url.dart';
@@ -26,7 +27,7 @@ class ChatbotPage extends StatefulWidget {
 
 class _ChatbotPageState extends State<ChatbotPage> {
   TextEditingController queryTextFormFieldController = TextEditingController();
-  ScrollController _draggableScrollbarController =
+  ScrollController _chatScrollbarController =
   ScrollController(keepScrollOffset: true);
   ScrollController _suggestionsScrollController = ScrollController();
 
@@ -36,6 +37,10 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
   GlobalKey appbarKey = GlobalKey();
   GlobalKey chatFieldKey = GlobalKey();
+  ChatPageController chatPageController = Get.find<ChatPageController>();
+  Rx<bool> shouldShowScrollButtons = Get.find<ChatPageController>().shouldShowScrollButtons;
+  WidgetDataController widgetDataController =
+  Get.find<WidgetDataController>();
 
   @override
   void initState() {
@@ -104,8 +109,6 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
     ChatSuggestionsController suggestionsController =
     Get.find<ChatSuggestionsController>();
-    WidgetDataController widgetDataController =
-    Get.find<WidgetDataController>();
 
     OverlayEntry previousOverlay;
 
@@ -120,46 +123,49 @@ class _ChatbotPageState extends State<ChatbotPage> {
               width: MediaQuery.of(context).size.width,
               top: widgetDataController.getSize(appbarKey).height,
               bottom: (MediaQuery.of(context).viewInsets.bottom + (widgetDataController.getSize(chatFieldKey).height + bottomPadding)).abs(),
-              child: Scrollbar(
-                controller: _suggestionsScrollController,
-                isAlwaysShown: true,
-                child: SingleChildScrollView(
+              child: Container(
+                color: Colors.black.withOpacity(0.3),
+                child: Scrollbar(
                   controller: _suggestionsScrollController,
-                  child: Wrap(
-                      direction: Axis.horizontal,
-                      children: suggestions
-                          .map((Option suggestion) => LimitedBox(
-                        maxWidth:
-                        MediaQuery.of(context).size.width - padding,
-                        child: Padding(
-                          padding: const EdgeInsets.all(padding),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              suggestionsController.setSuggestionSelected(suggestion.message);
+                  isAlwaysShown: true,
+                  child: SingleChildScrollView(
+                    controller: _suggestionsScrollController,
+                    child: Wrap(
+                        direction: Axis.horizontal,
+                        children: suggestions
+                            .map((Option suggestion) => LimitedBox(
+                          maxWidth:
+                          MediaQuery.of(context).size.width - padding,
+                          child: Padding(
+                            padding: const EdgeInsets.all(padding),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                suggestionsController.setSuggestionSelected(suggestion.message);
 
-                              clearTextBoxAndSendQuery(
-                                query: suggestion.queryForChatbot,
-                                sendMessageToDialogflow: chatBloc
-                                    .chatList[0].sendMessageToDialogFlow,
-                                action: chatBloc.chatList[0].action);
-                            },
-                            child: Container(
-                                child: Text(
-                                  suggestion.message,
-                                  style:
-                                  Theme.of(context).textTheme.bodyText1,
-                                )),
-                            style: ButtonStyle(
-                              shape: MaterialStateProperty.all(
-                                  StadiumBorder()),
-                              backgroundColor: MaterialStateProperty.all(
-                                  Colors.deepPurpleAccent
-                                      .withOpacity(0.9)),
+                                clearTextBoxAndSendQuery(
+                                  query: suggestion.queryForChatbot,
+                                  sendMessageToDialogflow: chatBloc
+                                      .chatList[0].sendMessageToDialogFlow,
+                                  action: chatBloc.chatList[0].action);
+                              },
+                              child: Container(
+                                  child: Text(
+                                    suggestion.message,
+                                    style:
+                                    Theme.of(context).textTheme.bodyText1,
+                                  )),
+                              style: ButtonStyle(
+                                shape: MaterialStateProperty.all(
+                                    StadiumBorder()),
+                                backgroundColor: MaterialStateProperty.all(
+                                    Colors.deepPurpleAccent
+                                        .withOpacity(0.9)),
+                              ),
                             ),
                           ),
-                        ),
-                      ))
-                          .toList()),
+                        ))
+                            .toList()),
+                  ),
                 ),
               ),
             );
@@ -231,6 +237,17 @@ class _ChatbotPageState extends State<ChatbotPage> {
   Get.put(ChatSuggestionsController());
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _chatScrollbarController.addListener(() {
+      if(_chatScrollbarController.offset != 0.0) {
+        Get.find<ChatPageController>().setShouldShowScrollButtons(true);
+      } else {
+        Get.find<ChatPageController>().setShouldShowScrollButtons(false);
+      }
+    });
+  }
+  @override
   Widget build(BuildContext context) {
     Message _message;
 
@@ -259,7 +276,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                     return ListView.builder(
                         reverse: true,
                         physics: ClampingScrollPhysics(),
-                        controller: _draggableScrollbarController,
+                        controller: _chatScrollbarController,
                         itemCount: chatList.length,
                         itemBuilder: (BuildContext context, int index) {
                           Message message = chatList[index];
@@ -346,34 +363,50 @@ class _ChatbotPageState extends State<ChatbotPage> {
           ),
         ],
       ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            heroTag: '1',
-            child: Icon(Icons.keyboard_arrow_up),
-            onPressed: () {
-              _draggableScrollbarController.animateTo(
-                  _draggableScrollbarController.position.maxScrollExtent,
-                  duration: Duration(milliseconds: 5000),
-                  curve: Curves.linear);
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: FloatingActionButton(
-              heroTag: '2',
-              child: Icon(Icons.keyboard_arrow_down),
-              onPressed: () {
-                _draggableScrollbarController.animateTo(
-                    _draggableScrollbarController.position.minScrollExtent,
-                    duration: Duration(milliseconds: 1000),
-                    curve: Curves.linear);
-              },
+      floatingActionButton: Obx(
+        () => AnimatedCrossFade(
+          duration: Duration(milliseconds: 500),
+          firstChild: Padding(
+            padding: EdgeInsets.only(bottom: 60),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FloatingActionButton(
+                  backgroundColor: Colors.yellow,
+                  mini: true,
+                  heroTag: '1',
+                  tooltip: 'Scroll to the top of the page',
+                  child: Icon(Icons.keyboard_arrow_up),
+                  onPressed: () {
+                    _chatScrollbarController.animateTo(
+                        _chatScrollbarController.position.maxScrollExtent,
+                        duration: Duration(milliseconds: 5000),
+                        curve: Curves.linear);
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: FloatingActionButton(
+                    backgroundColor: Colors.lightBlueAccent,
+                    mini: true,
+                    tooltip: 'Scroll to the bottom of the page',
+                    heroTag: '2',
+                    child: Icon(Icons.keyboard_arrow_down),
+                    onPressed: () {
+                      _chatScrollbarController.animateTo(
+                          _chatScrollbarController.position.minScrollExtent,
+                          duration: Duration(milliseconds: 1000),
+                          curve: Curves.linear);
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+          secondChild: Container(),
+          crossFadeState: shouldShowScrollButtons.value ? CrossFadeState.showFirst:CrossFadeState.showSecond,
+        ),
       ),
     );
   }
