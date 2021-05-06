@@ -7,6 +7,7 @@ import 'package:covibot/constants.dart' as constants;
 import 'package:covibot/getX/controllers/chat_suggestions_controller.dart';
 import 'package:covibot/getX/data_holders/api_data_holder.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dialogflow/dialogflow_v2.dart';
@@ -55,8 +56,6 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
 
   Locale chatbotLocale = Locale('en', 'UK');
 
-  // var apiResonse;
-  // List dataFilteredList = [];
   String actionType;
   String stateNameInAPIFormat;
   String districtNameInAPIFormat;
@@ -80,6 +79,10 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
         yield MessageAddedState(chatList: chatList);
 
         if (event.sendMessageToDialogFlow) {
+          if(!kIsWeb) {
+            final result = await InternetAddress.lookup('example.com');
+          }
+
           await _initializeDialogflow();
           AIResponse aiResponse = await dialogflow.detectIntent(query);
 
@@ -100,9 +103,6 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
                 .substring(constants.apiFetchKeyword.length)
                 .trim()
                 .toLowerCase();
-            // var httpResponse =
-            //     await http.get(responseListMessages[1]["payload"]["api"]);
-            // apiResonse = jsonDecode(httpResponse.body);
 
             await _addAnswerFromChatbot(
                 message: responseFromChatbot,
@@ -152,47 +152,17 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
                 ..changeSendUserQuery(false)
                 ..changeSuggestionType(SuggestionType.none);
             } else {
+              Get.find<ChatSuggestionsController>()
+                ..setSuggestionSelected(stateNameInAPIFormat)
+                ..changeSendUserQuery(true)
+                ..changeSuggestionType(SuggestionType.district);
               await _addAnswerFromChatbot(
                   message: 'AskDistrict'.tr(),
                   action: 'fetchResult',
                   sendMessageToDialogflow: false,
                   waitForSometime: true);
-
-              Get.find<ChatSuggestionsController>()
-                ..changeSendUserQuery(true)
-                ..changeSuggestionType(SuggestionType.district);
             }
 
-            // dataFilteredList = apiResonse["data"]
-            //     .where((data) => data["state"]
-            //             .toLowerCase()
-            //             .trim()
-            //             .contains(query.toLowerCase().trim())
-            //         ? true
-            //         : false)
-            //     .toList();
-
-            // if (dataFilteredList.length <= 0) {
-            //   await _addAnswerFromChatbot(
-            //       message:
-            //           'StateNotAvailable'.tr(),
-            //       waitForSometime: true);
-            //
-            //   Get.find<ChatSuggestionsController>()
-            //     ..changeSendUserQuery(false)
-            //     ..changeSuggestionType(SuggestionType.none);
-            //
-            // } else {
-            //   await _addAnswerFromChatbot(
-            //       message: 'AskDistrict'.tr(),
-            //       action: 'fetchResult',
-            //       sendMessageToDialogflow: false,
-            //       waitForSometime: true);
-            //
-            //   Get.find<ChatSuggestionsController>()
-            //     ..changeSendUserQuery(true)
-            //     ..changeSuggestionType(SuggestionType.district);
-            // }
           } else if (event.action == 'fetchResult') {
             Get.find<ChatSuggestionsController>()
               ..changeSendUserQuery(false)
@@ -210,25 +180,24 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
                 }
               });
 
-              await _sendMessageAccordingly(actionType);
+              if(districtNameInAPIFormat != null) {
+                await _sendMessageAccordingly(actionType);
+              } else {
+                await _addAnswerFromChatbot(
+                    message: 'DistrictNotAvailable'.tr(), waitForSometime: true);
+              }
+
+              Get.find<ChatSuggestionsController>()
+                ..changeSendUserQuery(false)
+                ..changeSuggestionType(SuggestionType.none);
             } else {
               await _addAnswerFromChatbot(
-                  message: 'DistrictNotAvailable'.tr(), waitForSometime: true);
+                  message: 'StateNotAvailable'.tr(), waitForSometime: true);
+
+              Get.find<ChatSuggestionsController>()
+                ..changeSendUserQuery(false)
+                ..changeSuggestionType(SuggestionType.none);
             }
-
-            // dataFilteredList = dataFilteredList
-            //     .where((data) => data["district"]
-            //         .toLowerCase()
-            //         .trim()
-            //         .contains(query.toLowerCase().trim()))
-            //     .toList();
-
-            // if (dataFilteredList.length <= 0) {
-            //   await _addAnswerFromChatbot(
-            //       message: 'DistrictNotAvailable'.tr(), waitForSometime: true);
-            // } else {
-            //   await _sendMessageAccordingly(actionType);
-            // }
           }
         }
       } on SocketException catch (socketException) {
@@ -310,32 +279,12 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
     stateNameInAPIFormat = stateNameInAPIFormat.trim().toLowerCase().replaceAll(' ', '_');
     districtNameInAPIFormat = districtNameInAPIFormat.trim().toLowerCase().replaceAll(' ', '_');
 
+    List<dynamic> dataList = [];
+
     switch (actionType) {
-      // case 'plasma':
-      //   _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'plasma');
-      //   dataFilteredList.forEach(
-      //         (data) {
-      //       _addFieldIfNotEmpty(
-      //           data,
-      //           {
-      //             'City'.tr(): 'city',
-      //             'District'.tr(): 'district',
-      //             'State'.tr(): 'state',
-      //             'PhoneNo'.tr(): 'phone1',
-      //             'Description'.tr(): 'description',
-      //             'SourceLink'.tr(): 'sourceLink',
-      //             'Name'.tr(): 'name',
-      //             'Comment'.tr(): 'comment',
-      //             'LastVerifiedOn'.tr(): 'LastVerifiedOn'
-      //           },
-      //           substringFieldName: 'lastVerifiedOn',
-      //           substringEndIndex: 10);
-      //     },
-      //   );
-      //   break;
       case 'oxygen':
-        List<dynamic> dataList = await _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'oxygen');
-        print(dataList);
+        dataList = await _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'oxygen');
+
         dataList.forEach(
               (data) {
             _addFieldIfNotEmpty(
@@ -353,44 +302,53 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
                   'Comment'.tr(): 'comment',
                   'LastVerifiedOn'.tr(): 'last_verified_on',
                   'Type'.tr(): 'resource type',
-                },
-                substringFieldName: 'lastVerifiedOn',
-                substringEndIndex: 10);
+                },);
           },
         );
         break;
       case 'helplinenumber':
-        List<Map<String, dynamic>> dataList = await _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'helpline_number');
+        dataList = await _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'helpline');
 
         dataList.forEach(
               (data) {
             _addFieldIfNotEmpty(data, {
               'District'.tr(): 'district',
               'State'.tr(): 'state',
-              'PhoneNo'.tr(): 'phone1',
+              'PhoneNo'.tr(): 'phone_1',
+              'PhoneNo2'.tr(): 'phone_2',
               'Description'.tr(): 'description',
-              'Source'.tr(): 'source',
-              'SourceLink'.tr(): 'sourceLink'
-            });
+              'SourceLink'.tr(): 'source_link',
+              'EmailId'.tr(): 'email',
+              'LastVerifiedOn'.tr(): 'last_verified_on'
+            },
+                substringFieldName: 'last_verified_on',
+                substringEndIndex: 10
+            );
           },
         );
         break;
       case 'ambulance':
-        List<Map<String, dynamic>> dataList = await _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'ambulance');
+        dataList = await _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'ambulance');
 
         dataList.forEach(
               (data) {
             _addFieldIfNotEmpty(data, {
               'District'.tr(): 'district',
               'State'.tr(): 'state',
-              'PhoneNo'.tr(): 'phone1',
+              'PhoneNo'.tr(): 'phone_1',
+              'PhoneNo2'.tr(): 'phone_2',
+              'EmailId'.tr(): 'email',
               'Comment'.tr(): 'comment',
+              'Description'.tr(): 'description',
+              'SourceLink'.tr(): 'source_link',
+              'Address'.tr(): 'address',
+              'Title'.tr(): 'title'
             });
           },
         );
         break;
       case 'hospitalsandbeds':
-        List<Map<String, dynamic>> dataList = await _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'hospitals');
+        dataList = await _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'hospital');
 
         dataList.forEach(
               (data) {
@@ -399,19 +357,21 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
                 {
                   'District'.tr(): 'district',
                   'State'.tr(): 'state',
-                  'PhoneNo'.tr(): 'phone1',
-                  'PhoneNo2'.tr(): 'phone2',
+                  'PhoneNo'.tr(): 'phone_1',
+                  'PhoneNo2'.tr(): 'phone_2',
+                  'EmailId'.tr(): 'email',
+                  'Address'.tr(): 'address',
+                  'Description'.tr(): 'description',
+                  'Title'.tr(): 'title',
                   'Comment'.tr(): 'comment',
-                  'LastVerifiedOn'.tr(): 'lastVerifiedOn',
-                  'Name'.tr(): 'name'
-                },
-                substringFieldName: 'lastVerifiedOn',
-                substringEndIndex: 10);
+                  'LastVerifiedOn'.tr(): 'last_verified_on',
+                  'Type'.tr(): 'resource type',
+                });
           },
         );
         break;
       case 'medicineavailability':
-        List<Map<String, dynamic>> dataList = await _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'medicine');
+        dataList = await _fetchAndDecodeResourceResponse(state: stateNameInAPIFormat, district: districtNameInAPIFormat, resource: 'medicine');
 
         dataList.forEach(
               (data) {
@@ -420,20 +380,27 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
                 {
                   'District'.tr(): 'district',
                   'State'.tr(): 'state',
-                  'PhoneNo'.tr(): 'phone1',
-                  'Comment'.tr(): 'comment',
-                  'LastVerifiedOn'.tr(): 'lastVerifiedOn',
+                  'PhoneNo'.tr(): 'phone_1',
+                  'PhoneNo2'.tr(): 'phone_2',
+                  'EmailId'.tr(): 'email',
+                  'Title'.tr(): 'title',
+                  'Description'.tr(): 'description',
                   'Address'.tr(): 'address',
-                  'Name'.tr(): 'name'
-                },
-                substringFieldName: 'lastVerifiedOn',
-                substringEndIndex: 10);
+                  'Comment'.tr(): 'comment',
+                  'LastVerifiedOn'.tr(): 'last_verified_on',
+                  'SourceLink'.tr(): 'source_link',
+                });
           },
         );
         break;
       default:
         await _addAnswerFromChatbot(
             message: constants.errorMessage, waitForSometime: true);
+    }
+
+    if(dataList.length <= 0) {
+      await _addAnswerFromChatbot(
+          message: 'DataNotAvailable'.tr(), waitForSometime: true);
     }
   }
 
@@ -474,11 +441,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
 
       var uri = Uri.https(constants.primaryEndpoint, constants.endpointConcatenateString, queryParameters);
 
-      http.Response httpResponse = await http.get(uri, headers: {
-        HttpHeaders.contentTypeHeader: 'application/json',
-        'Access-Control-Allow-Origin': "*",
-        'Access-Control-Allow-Methods': "GET, HEAD",
-      });
+      http.Response httpResponse = await http.get(uri);
 
       var apiResponse = await jsonDecode(httpResponse.body);
 

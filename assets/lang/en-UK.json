@@ -21,6 +21,7 @@
 
   "StateNotAvailable": "Sorry. We do not have data for this state right now",
   "DistrictNotAvailable": "Sorry. We do not have data for this district right now",
+  "DataNotAvailable": "Sorry. We do not have data for this place right now",
 
   "City": "City",
   "District": "District",
